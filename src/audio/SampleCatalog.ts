@@ -37,23 +37,23 @@ export const SAMPLE_CATALOG: SampleMetadata[] = [
   { id: 'vox_2', name: 'Extra 2', category: 'extras', type: 'drum', url: '/audio/samples/drums/extras/[ACD] - LilJon Hi.wav' },
 
   // --- MELODIC: KEYS ---
-  { id: 'keys_1', name: 'Keys 1', category: 'keys', type: 'melodic', url: '/audio/samples/melodics/piano/[ keys ] luv 1shots  (3).wav', isDefault: true },
-  { id: 'keys_2', name: 'Keys 2', category: 'keys', type: 'melodic', url: '/audio/samples/melodics/piano/[ keys ] luv 1shots  (5).wav' },
-  { id: 'keys_3', name: 'Keys 3', category: 'keys', type: 'melodic', url: '/audio/samples/melodics/piano/[ keys ] luv 1shots  (7).wav' },
+  { id: 'keys_1', name: 'Keys 1', category: 'keys', type: 'melodic', url: '/audio/samples/melodics/piano/[ keys ] luv 1shots  (3).wav', rootMidiNote: 60, isDefault: true },
+  { id: 'keys_2', name: 'Keys 2', category: 'keys', type: 'melodic', url: '/audio/samples/melodics/piano/[ keys ] luv 1shots  (5).wav', rootMidiNote: 60 },
+  { id: 'keys_3', name: 'Keys 3', category: 'keys', type: 'melodic', url: '/audio/samples/melodics/piano/[ keys ] luv 1shots  (7).wav', rootMidiNote: 60 },
  
   // --- MELODIC: SYNTHS ---
-  { id: 'synth_1', name: 'Synth 1', category: 'synths', type: 'melodic', url: '/audio/samples/melodics/synths/[ keys ] luv 1shots  (2).wav', isDefault: true },
-  { id: 'synth_2', name: 'Synth 2', category: 'synths', type: 'melodic', url: '/audio/samples/melodics/synths/[ keys ] luv 1shots  (4).wav' },
-  { id: 'synth_3', name: 'Synth 3', category: 'synths', type: 'melodic', url: '/audio/samples/melodics/synths/[ keys ] luv 1shots  (6).wav' },
+  { id: 'synth_1', name: 'Synth 1', category: 'synths', type: 'melodic', url: '/audio/samples/melodics/synths/[ keys ] luv 1shots  (2).wav', rootMidiNote: 60 , isDefault: true },
+  { id: 'synth_2', name: 'Synth 2', category: 'synths', type: 'melodic', url: '/audio/samples/melodics/synths/[ keys ] luv 1shots  (4).wav', rootMidiNote: 60 },
+  { id: 'synth_3', name: 'Synth 3', category: 'synths', type: 'melodic', url: '/audio/samples/melodics/synths/[ keys ] luv 1shots  (6).wav', rootMidiNote: 60 },
 
   // --- MELODIC: BASS ---
-  { id: 'bass_1', name: 'Bass 1', category: 'bass', type: 'melodic', url: '/audio/samples/melodics/bass/[ keys ] luv 1shots  (1).wav', isDefault: true },
+  { id: 'bass_1', name: 'Bass 1', category: 'bass', type: 'melodic', url: '/audio/samples/melodics/bass/[ keys ] luv 1shots  (1).wav', rootMidiNote: 60 , isDefault: true },
 
   // --- MELODIC: EXTRAS ---
-  { id: '808_1', name: '808 1', category: '808s', type: 'melodic', url: '/audio/samples/melodics/808s/Official Spinz808.wav', isDefault: true },
-  { id: '808_2', name: '808 2', category: '808s', type: 'melodic', url: '/audio/samples/melodics/808s/808 - sr25.wav' },
-  { id: '808_2', name: '808 2', category: '808s', type: 'melodic', url: '/audio/samples/melodics/808s/Stop Breathing 808 !6.wav' },
-  { id: '808_2', name: '808 2', category: '808s', type: 'melodic', url: '/audio/samples/melodics/808s/ZAY 808.wav' }
+  { id: '808_1', name: '808 1', category: '808s', type: 'melodic', url: '/audio/samples/melodics/808s/Official Spinz808.wav', rootMidiNote: 60 , isDefault: true },
+  { id: '808_2', name: '808 2', category: '808s', type: 'melodic', url: '/audio/samples/melodics/808s/808 - sr25.wav', rootMidiNote: 60 },
+  { id: '808_2', name: '808 2', category: '808s', type: 'melodic', url: '/audio/samples/melodics/808s/Stop Breathing 808 !6.wav', rootMidiNote: 60 },
+  { id: '808_2', name: '808 2', category: '808s', type: 'melodic', url: '/audio/samples/melodics/808s/ZAY 808.wav', rootMidiNote: 60 }
 
 ];
 
