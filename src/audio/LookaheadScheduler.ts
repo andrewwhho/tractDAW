@@ -9,11 +9,12 @@ export type VisualStepCallback = (step: number, audioTime: number) => void;
 export class LookaheadScheduler {
   private audioCtx: AudioContext;
   private isPlaying = false;
-  private currentStep = 0; // 0 to 15
+  private currentStep = 0; // 0 to totalSteps - 1
   private nextStepTime = 0.0; // in audioContext.currentTime seconds
   private timerId: number | null = null;
 
   public bpm = 120;
+  public totalSteps = 64; // 16 beats (4 bars of 4/4) = 64 16th-note steps
   public lookaheadMs = 25.0; // How frequently the scheduler checks (milliseconds)
   public scheduleAheadTime = 0.1; // How far ahead to schedule hardware nodes (seconds)
 
@@ -96,6 +97,14 @@ export class LookaheadScheduler {
     return this.currentStep;
   }
 
+  public setTotalSteps(steps: number): void {
+    this.totalSteps = Math.max(1, steps);
+  }
+
+  public getTotalSteps(): number {
+    return this.totalSteps;
+  }
+
   /**
    * The core lookahead loop.
    * Runs every 25ms and schedules all 16th-note steps falling into the next 100ms window.
@@ -129,7 +138,7 @@ export class LookaheadScheduler {
   private advanceStep(): void {
     const secondsPer16th = 60.0 / this.bpm / 4.0;
     this.nextStepTime += secondsPer16th;
-    this.currentStep = (this.currentStep + 1) % 16;
+    this.currentStep = (this.currentStep + 1) % this.totalSteps;
   }
 }
 

@@ -36,3 +36,15 @@ export interface VoiceTriggerOptions {
   duration?: number;     // Optional note length in seconds
 }
 
+export interface Track {
+  id: string;          // e.g. 'track_0', 'track_1'
+  name: string;        // e.g. 'Kick 1', 'Snare 1', 'Spinz 808'
+  type: TrackType;     // 'drum' | 'melodic'
+  sampleId: string;    // ID in SampleCatalog (e.g. 'kick_1', '808_1')
+  volume: number;      // 0.0 to 1.0 (default 0.8)
+  isMuted: boolean;
+  isSoloed: boolean;
+  steps: boolean[];    // Array of active triggers (e.g. 64 elements for 16 beats / 4 bars)
+  pitches: number[];   // Array of MIDI note numbers (default 60 = C4)
+}
+
