@@ -1,5 +1,4 @@
 import React from "react";
-import { TractDAW } from "./components/TractDAW";
 
 export const App: React.FC = () => {
   return (
@@ -9,10 +8,13 @@ export const App: React.FC = () => {
         background: "#080808",
         color: "#fff",
         padding: "20px",
+        fontFamily: "monospace",
       }}
     >
-      <header>tractDAW</header>
-      <TractDAW />
+      <header style={{ fontSize: "20px", fontWeight: "bold" }}>tractDAW</header>
+      <p style={{ color: "#888", marginTop: "8px" }}>
+        Phase 1: Audio Sample Loader
+      </p>
     </main>
   );
 };
