@@ -27,13 +27,7 @@ export const NOTE_NAMES: Record<number, string> = Object.fromEntries(
 interface SequencerProps {
   tracks: Track[];
   activeStep: number;
-  viewMode: "paged" | "all";
-  selectedBar: number;
-  autoFollow: boolean;
   activePitches: Record<string, number>;
-  onViewModeChange: (mode: "paged" | "all") => void;
-  onSelectedBarChange: (bar: number) => void;
-  onAutoFollowChange: (follow: boolean) => void;
   onToggleStep: (trackIndex: number, stepIndex: number) => void;
   onSetStepPitch: (
     trackIndex: number,
@@ -53,13 +47,7 @@ interface SequencerProps {
 export const Sequencer: React.FC<SequencerProps> = ({
   tracks,
   activeStep,
-  viewMode,
-  selectedBar,
-  autoFollow,
   activePitches,
-  onViewModeChange,
-  onSelectedBarChange,
-  onAutoFollowChange,
   onToggleStep,
   onSetStepPitch,
   onRemoveStep,
@@ -82,12 +70,8 @@ export const Sequencer: React.FC<SequencerProps> = ({
   // Add track dropdown modal state
   const [showAddMenu, setShowAddMenu] = useState(false);
 
-  const activeBarIndex = activeStep >= 0 ? Math.floor(activeStep / 16) : -1;
-
-  const displayedStepIndices =
-    viewMode === "paged"
-      ? Array.from({ length: 16 }, (_, i) => selectedBar * 16 + i)
-      : Array.from({ length: 64 }, (_, i) => i);
+  // Always 64 Steps (4 Bars of 16th notes)
+  const displayedStepIndices = Array.from({ length: 64 }, (_, i) => i);
 
   // Step click: silent placement (no audition on click)
   const handleStepClick = (
@@ -133,115 +117,6 @@ export const Sequencer: React.FC<SequencerProps> = ({
       onClick={() => pitchPicker && setPitchPicker(null)}
       style={{ width: "100%", boxSizing: "border-box" }}
     >
-      {/* 4-Bar Mini Timeline Overview & Bar Tabs */}
-      <section
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "12px",
-          marginBottom: "12px",
-        }}
-      >
-        {/* Bar Selector Tabs */}
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          {[0, 1, 2, 3].map((barIdx) => {
-            const isCurrentPlayingBar = activeBarIndex === barIdx;
-            const isSelected = viewMode === "paged" && selectedBar === barIdx;
-
-            return (
-              <button
-                key={barIdx}
-                onClick={() => {
-                  onViewModeChange("paged");
-                  onSelectedBarChange(barIdx);
-                }}
-                style={{
-                  background: isSelected
-                    ? "#2563eb"
-                    : isCurrentPlayingBar
-                      ? "#1e3a8a"
-                      : "#18181b",
-                  color: isSelected || isCurrentPlayingBar ? "#fff" : "#a1a1aa",
-                  border: isCurrentPlayingBar
-                    ? "1px solid #60a5fa"
-                    : isSelected
-                      ? "1px solid #3b82f6"
-                      : "1px solid #27272a",
-                  padding: "8px 14px",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  fontSize: "12px",
-                  fontWeight: "bold",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  transition: "all 0.15s ease",
-                }}
-              >
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: "6px",
-                    height: "6px",
-                    borderRadius: "50%",
-                    background: isCurrentPlayingBar
-                      ? "#22c55e"
-                      : isSelected
-                        ? "#60a5fa"
-                        : "#52525b",
-                    boxShadow: isCurrentPlayingBar ? "0 0 6px #22c55e" : "none",
-                  }}
-                />
-                BAR {barIdx + 1}{" "}
-                <span style={{ fontSize: "10px", opacity: 0.7 }}>
-                  ({barIdx * 16 + 1}-{barIdx * 16 + 16})
-                </span>
-              </button>
-            );
-          })}
-
-          {/* Full 64 Steps Button */}
-          <button
-            onClick={() => onViewModeChange("all")}
-            style={{
-              background: viewMode === "all" ? "#2563eb" : "#18181b",
-              color: viewMode === "all" ? "#fff" : "#a1a1aa",
-              border:
-                viewMode === "all" ? "1px solid #3b82f6" : "1px solid #27272a",
-              padding: "8px 14px",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontSize: "12px",
-              fontWeight: "bold",
-            }}
-          >
-            VIEW ALL 64 STEPS
-          </button>
-        </div>
-
-        {/* Auto Follow Toggle */}
-        <label
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            fontSize: "12px",
-            color: "#a1a1aa",
-            cursor: "pointer",
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={autoFollow}
-            onChange={(e) => onAutoFollowChange(e.target.checked)}
-            style={{ accentColor: "#2563eb", cursor: "pointer" }}
-          />
-          Auto-Follow Playhead Across Bars
-        </label>
-      </section>
-
       {/* 64-Step Sequencer Rack */}
       <section
         style={{
@@ -267,12 +142,17 @@ export const Sequencer: React.FC<SequencerProps> = ({
               fontSize: "11px",
               fontWeight: "bold",
               color: "#71717a",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
             }}
           >
-            CHANNEL RACK (
-            {viewMode === "paged" ? `BAR ${selectedBar + 1}` : "FULL 64 STEPS"})
+            CHANNEL RACK{" "}
+            <span style={{ color: "#60a5fa", fontSize: "10px" }}>
+              ● 64 STEPS (4 BARS)
+            </span>
           </div>
-          <div style={{ display: "flex", gap: "4px", flex: 1 }}>
+          <div style={{ display: "flex", gap: "3px", flex: 1 }}>
             {displayedStepIndices.map((globalStepIdx) => {
               const isCurrent = activeStep === globalStepIdx;
               const isBarStart = globalStepIdx % 16 === 0;
@@ -295,7 +175,7 @@ export const Sequencer: React.FC<SequencerProps> = ({
                     boxShadow: isCurrent ? "0 0 8px #3b82f6" : "none",
                     transition: "background 0.04s, box-shadow 0.04s",
                     borderLeft:
-                      viewMode === "all" && isBarStart && globalStepIdx !== 0
+                      isBarStart && globalStepIdx !== 0
                         ? "2px solid #60a5fa"
                         : "none",
                   }}
@@ -460,16 +340,14 @@ export const Sequencer: React.FC<SequencerProps> = ({
                   )}
                 </div>
 
-                {/* Step Buttons Grid */}
-                <div style={{ display: "flex", gap: "4px", flex: 1 }}>
+                {/* Step Buttons Grid (Permanent 64 Steps) */}
+                <div style={{ display: "flex", gap: "3px", flex: 1 }}>
                   {displayedStepIndices.map((globalStepIdx) => {
                     const isActive = track.steps[globalStepIdx];
                     const isBeatGroupA =
                       Math.floor(globalStepIdx / 4) % 2 === 0;
                     const isBarBoundary =
-                      viewMode === "all" &&
-                      globalStepIdx % 16 === 0 &&
-                      globalStepIdx !== 0;
+                      globalStepIdx % 16 === 0 && globalStepIdx !== 0;
                     const isCurrent = activeStep === globalStepIdx;
                     const pitch = track.pitches[globalStepIdx] ?? 60;
                     const pitchName =
@@ -491,8 +369,8 @@ export const Sequencer: React.FC<SequencerProps> = ({
                         }}
                         style={{
                           flex: 1,
-                          height: viewMode === "all" ? "26px" : "32px",
-                          minWidth: viewMode === "all" ? "12px" : "18px",
+                          height: "26px",
+                          minWidth: "12px",
                           borderRadius: "3px",
                           border: isCurrent
                             ? "1px solid #60a5fa"
@@ -514,7 +392,7 @@ export const Sequencer: React.FC<SequencerProps> = ({
                               ? "#fff"
                               : "#000"
                             : "#71717a",
-                          fontSize: viewMode === "all" ? "8px" : "10px",
+                          fontSize: "8px",
                           fontWeight: "bold",
                           cursor: "pointer",
                           display: "flex",
@@ -535,11 +413,7 @@ export const Sequencer: React.FC<SequencerProps> = ({
                             : `Step ${globalStepIdx + 1}: Empty (Click to add note)`
                         }
                       >
-                        {pitchName
-                          ? viewMode === "all"
-                            ? pitchName.slice(0, 2)
-                            : pitchName
-                          : ""}
+                        {pitchName ? pitchName.slice(0, 2) : ""}
                       </button>
                     );
                   })}

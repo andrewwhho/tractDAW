@@ -154,20 +154,10 @@ export const App: React.FC = () => {
   const [tracks, setTracks] = useState<Track[]>(INITIAL_TRACKS);
   const [activeStep, setActiveStep] = useState<number>(-1);
 
-  // View state: 'sequencer' | 'mixer' | 'split'
-  const [activeView, setActiveView] = useState<"sequencer" | "mixer" | "split">(
-    "sequencer",
-  );
-
-  // Container fit mode: 'fullscreen' (default full width) | 'windowpane' (simulating 860x590 WindowPane)
+  // Container fit mode: 'fullscreen' (default full width) | 'windowpane' (simulating 1280x720 WindowPane)
   const [containerMode, setContainerMode] = useState<
     "fullscreen" | "windowpane"
   >("fullscreen");
-
-  // Sequencer configuration
-  const [viewMode, setViewMode] = useState<"paged" | "all">("paged");
-  const [selectedBar, setSelectedBar] = useState<number>(0);
-  const [autoFollow, setAutoFollow] = useState<boolean>(false);
 
   // Active default pitch per melodic track
   const [activePitches, setActivePitches] = useState<Record<string, number>>({
@@ -177,16 +167,6 @@ export const App: React.FC = () => {
 
   const engineRef = useRef<AudioEngine | null>(null);
   const stepQueueRef = useRef<{ step: number; time: number }[]>([]);
-  const autoFollowRef = useRef(autoFollow);
-  const viewModeRef = useRef(viewMode);
-
-  useEffect(() => {
-    autoFollowRef.current = autoFollow;
-  }, [autoFollow]);
-
-  useEffect(() => {
-    viewModeRef.current = viewMode;
-  }, [viewMode]);
 
   // 1. Initialize Audio Engine & Preload Default Kit
   useEffect(() => {
@@ -226,11 +206,6 @@ export const App: React.FC = () => {
         ) {
           const nextEvent = stepQueueRef.current.shift()!;
           setActiveStep(nextEvent.step);
-
-          if (autoFollowRef.current && viewModeRef.current === "paged") {
-            const currentBar = Math.floor(nextEvent.step / 16);
-            setSelectedBar(currentBar);
-          }
         }
       }
       animId = requestAnimationFrame(tickPlayhead);
@@ -266,7 +241,7 @@ export const App: React.FC = () => {
     engineRef.current?.setMasterVolume(vol);
   };
 
-  // Keyboard Shortcuts (Space = Play/Stop, 1 = Sequencer, 2 = Mixer, 3 = Split)
+  // Keyboard Shortcuts (Space = Play/Stop)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (
@@ -280,12 +255,6 @@ export const App: React.FC = () => {
       if (e.code === "Space") {
         e.preventDefault();
         handleTogglePlay();
-      } else if (e.key === "1") {
-        setActiveView("sequencer");
-      } else if (e.key === "2") {
-        setActiveView("mixer");
-      } else if (e.key === "3") {
-        setActiveView("split");
       }
     };
 
@@ -665,7 +634,7 @@ export const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Tier 2: View Switcher Tabs & Project Actions */}
+        {/* Tier 2: Studio Layout & Project Actions */}
         <div
           style={{
             display: "flex",
@@ -677,95 +646,31 @@ export const App: React.FC = () => {
             paddingTop: "8px",
           }}
         >
-          {/* View Switcher Tabs */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              background: "#09090b",
-              padding: "2px",
-              borderRadius: "5px",
-              border: "1px solid #3f3f46",
-              gap: "2px",
-            }}
-          >
-            <button
-              onClick={() => setActiveView("sequencer")}
+          {/* Studio Layout Indicator & Track Capacity */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <span
               style={{
-                background:
-                  activeView === "sequencer" ? "#2563eb" : "transparent",
-                color: activeView === "sequencer" ? "#fff" : "#a1a1aa",
-                border: "none",
-                borderRadius: "3px",
-                padding: "4px 10px",
-                cursor: "pointer",
                 fontSize: "11px",
                 fontWeight: "bold",
+                color: "#60a5fa",
                 display: "flex",
                 alignItems: "center",
-                gap: "5px",
-                boxShadow:
-                  activeView === "sequencer"
-                    ? "0 0 8px rgba(37, 99, 235, 0.4)"
-                    : "none",
+                gap: "6px",
+                letterSpacing: "0.5px",
               }}
-              title="View 64-step channel rack [Key: 1]"
-            >
-              🎹 SEQUENCER{" "}
-              <span style={{ opacity: 0.6, fontSize: "9px" }}>[1]</span>
-            </button>
-            <button
-              onClick={() => setActiveView("mixer")}
-              style={{
-                background: activeView === "mixer" ? "#2563eb" : "transparent",
-                color: activeView === "mixer" ? "#fff" : "#a1a1aa",
-                border: "none",
-                borderRadius: "3px",
-                padding: "4px 10px",
-                cursor: "pointer",
-                fontSize: "11px",
-                fontWeight: "bold",
-                display: "flex",
-                alignItems: "center",
-                gap: "5px",
-                boxShadow:
-                  activeView === "mixer"
-                    ? "0 0 8px rgba(37, 99, 235, 0.4)"
-                    : "none",
-              }}
-              title="View track mixing console [Key: 2]"
-            >
-              🎛️ MIXER{" "}
-              <span style={{ opacity: 0.6, fontSize: "9px" }}>[2]</span>
-            </button>
-            <button
-              onClick={() => setActiveView("split")}
-              style={{
-                background: activeView === "split" ? "#2563eb" : "transparent",
-                color: activeView === "split" ? "#fff" : "#a1a1aa",
-                border: "none",
-                borderRadius: "3px",
-                padding: "4px 10px",
-                cursor: "pointer",
-                fontSize: "11px",
-                fontWeight: "bold",
-                display: "flex",
-                alignItems: "center",
-                gap: "5px",
-                boxShadow:
-                  activeView === "split"
-                    ? "0 0 8px rgba(37, 99, 235, 0.4)"
-                    : "none",
-              }}
-              title="View both Sequencer and Mixer [Key: 3]"
             >
               🪟 SPLIT VIEW{" "}
-              <span style={{ opacity: 0.6, fontSize: "9px" }}>[3]</span>
-            </button>
-          </div>
+              <span
+                style={{
+                  color: "#71717a",
+                  fontWeight: "normal",
+                  fontSize: "10px",
+                }}
+              >
+                (Channel Rack + Mixer Console)
+              </span>
+            </span>
 
-          {/* Quick Actions & Capacity Indicator */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             {/* Track Limit Pill */}
             <span
               style={{
@@ -796,7 +701,10 @@ export const App: React.FC = () => {
             >
               {tracks.length} / 10 TRACKS
             </span>
+          </div>
 
+          {/* Quick Actions & Window Mode */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <button
               onClick={handleClearAll}
               style={{
@@ -861,7 +769,7 @@ export const App: React.FC = () => {
         </div>
       </section>
 
-      {/* Main Workspace: Sequencer and/or Mixer */}
+      {/* Main Workspace: Channel Rack (Top) + Mixer Console (Bottom) */}
       <div
         style={{
           display: "flex",
@@ -870,42 +778,32 @@ export const App: React.FC = () => {
           width: "100%",
         }}
       >
-        {(activeView === "sequencer" || activeView === "split") && (
-          <Sequencer
-            tracks={tracks}
-            activeStep={activeStep}
-            viewMode={viewMode}
-            selectedBar={selectedBar}
-            autoFollow={autoFollow}
-            activePitches={activePitches}
-            onViewModeChange={setViewMode}
-            onSelectedBarChange={setSelectedBar}
-            onAutoFollowChange={setAutoFollow}
-            onToggleStep={handleToggleStep}
-            onSetStepPitch={handleSetStepPitch}
-            onRemoveStep={handleRemoveStep}
-            onToggleMute={handleToggleMute}
-            onToggleSolo={handleToggleSolo}
-            onSampleChange={handleSampleChange}
-            onAuditionTrack={handleAuditionTrack}
-            onAddTrack={handleAddTrack}
-            onDeleteTrack={handleDeleteTrack}
-            onActivePitchChange={(id, pitch) =>
-              setActivePitches((prev) => ({ ...prev, [id]: pitch }))
-            }
-          />
-        )}
+        <Sequencer
+          tracks={tracks}
+          activeStep={activeStep}
+          activePitches={activePitches}
+          onToggleStep={handleToggleStep}
+          onSetStepPitch={handleSetStepPitch}
+          onRemoveStep={handleRemoveStep}
+          onToggleMute={handleToggleMute}
+          onToggleSolo={handleToggleSolo}
+          onSampleChange={handleSampleChange}
+          onAuditionTrack={handleAuditionTrack}
+          onAddTrack={handleAddTrack}
+          onDeleteTrack={handleDeleteTrack}
+          onActivePitchChange={(id, pitch) =>
+            setActivePitches((prev) => ({ ...prev, [id]: pitch }))
+          }
+        />
 
-        {(activeView === "mixer" || activeView === "split") && (
-          <Mixer
-            tracks={tracks}
-            masterVolume={masterVolume}
-            onMasterVolumeChange={handleMasterVolChange}
-            onTrackVolumeChange={handleTrackVolumeChange}
-            onToggleMute={handleToggleMute}
-            onToggleSolo={handleToggleSolo}
-          />
-        )}
+        <Mixer
+          tracks={tracks}
+          masterVolume={masterVolume}
+          onMasterVolumeChange={handleMasterVolChange}
+          onTrackVolumeChange={handleTrackVolumeChange}
+          onToggleMute={handleToggleMute}
+          onToggleSolo={handleToggleSolo}
+        />
       </div>
 
       {/* Compact Status / Tips Footer */}
@@ -923,8 +821,8 @@ export const App: React.FC = () => {
         }}
       >
         <div>
-          💡 <strong>Tips:</strong> Click track name to audition • Space:
-          Play/Stop • Keys 1/2/3: Switch Views
+          💡 <strong>Tips:</strong> Click track name to audition sound • Space:
+          Play/Stop • Drag faders to mix • Max 10 Tracks
         </div>
         <div>tractDAW • Max 10 Tracks • 64 Steps</div>
       </footer>
