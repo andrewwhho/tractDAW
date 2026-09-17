@@ -1,169 +1,27 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { AudioEngine } from "./audio/AudioEngine";
-import { Track } from "./types";
-import { SAMPLE_CATALOG } from "./audio/SampleCatalog";
 import { Sequencer } from "./components/Sequencer";
 import { Mixer } from "./components/Mixer";
-
-// Helper to construct a 64-step track pattern
-const createTrack = (
-  id: string,
-  name: string,
-  type: "drum" | "melodic",
-  sampleId: string,
-  activeIndices: number[],
-  pitchesMap: Record<number, number> = {},
-  volume = 0.8,
-): Track => {
-  const steps = new Array(64).fill(false);
-  const pitches = new Array(64).fill(60);
-  activeIndices.forEach((idx) => {
-    if (idx >= 0 && idx < 64) {
-      steps[idx] = true;
-    }
-  });
-  Object.entries(pitchesMap).forEach(([idxStr, note]) => {
-    const idx = parseInt(idxStr, 10);
-    if (idx >= 0 && idx < 64) {
-      pitches[idx] = note;
-    }
-  });
-  return {
-    id,
-    name,
-    type,
-    sampleId,
-    volume,
-    isMuted: false,
-    isSoloed: false,
-    steps,
-    pitches,
-  };
-};
-
-// 4-Bar (16 Beats / 64 Steps) Initial Demo Groove
-const INITIAL_TRACKS: Track[] = [
-  createTrack(
-    "track_kick",
-    "Kick 1",
-    "drum",
-    "kick_1",
-    [0, 6, 10, 16, 22, 26, 28, 32, 38, 42, 48, 54, 58, 60],
-    {},
-    0.9,
-  ),
-  createTrack(
-    "track_snare",
-    "Snare 1",
-    "drum",
-    "snare_1",
-    [4, 12, 20, 28, 36, 44, 52, 60, 62],
-    {},
-    0.8,
-  ),
-  createTrack(
-    "track_clap",
-    "Clap 1",
-    "drum",
-    "clap_1",
-    [8, 24, 40, 56],
-    {},
-    0.8,
-  ),
-  createTrack(
-    "track_hat",
-    "Closed Hat",
-    "drum",
-    "hihat_closed_1",
-    [
-      0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 27, 28, 30, 32, 34, 36,
-      38, 40, 42, 43, 44, 46, 48, 50, 52, 54, 56, 58, 59, 60, 61, 62, 63,
-    ],
-    {},
-    0.7,
-  ),
-  createTrack(
-    "track_openhat",
-    "Open Hat",
-    "drum",
-    "hihat_open_1",
-    [6, 22, 38, 54],
-    {},
-    0.75,
-  ),
-  createTrack(
-    "track_perc",
-    "Perc 1",
-    "drum",
-    "perc_1",
-    [11, 27, 43, 59],
-    {},
-    0.75,
-  ),
-  createTrack(
-    "track_808",
-    "Spinz 808",
-    "melodic",
-    "808_1",
-    [0, 6, 10, 14, 16, 22, 26, 30, 32, 38, 42, 46, 48, 54, 58, 61],
-    {
-      0: 60, // C4
-      6: 63, // D#4
-      10: 65, // F4
-      14: 67, // G4
-      16: 60, // C4
-      22: 63, // D#4
-      26: 65, // F4
-      30: 70, // A#4
-      32: 68, // G#4
-      38: 65, // F4
-      42: 63, // D#4
-      46: 62, // D4
-      48: 60, // C4
-      54: 63, // D#4
-      58: 67, // G4
-      61: 68, // G#4
-    },
-    0.9,
-  ),
-  createTrack(
-    "track_synth",
-    "Synth Stab",
-    "melodic",
-    "synth_1",
-    [0, 8, 16, 24, 32, 40, 48, 56],
-    {
-      0: 60, // C4
-      8: 63, // D#4
-      16: 60, // C4
-      24: 67, // G4
-      32: 68, // G#4
-      40: 65, // F4
-      48: 60, // C4
-      56: 63, // D#4
-    },
-    0.65,
-  ),
-];
+import { useDawStore } from "./store/useDawStore";
 
 export const App: React.FC = () => {
-  const [isReady, setIsReady] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [bpm, setBpm] = useState(130);
-  const [masterVolume, setMasterVolume] = useState(0.8);
-  const [tracks, setTracks] = useState<Track[]>(INITIAL_TRACKS);
-  const [activeStep, setActiveStep] = useState<number>(-1);
-
-  // Container fit mode: 'fullscreen' (default full width) | 'windowpane' (simulating 1280x720 WindowPane)
-  const [containerMode, setContainerMode] = useState<
-    "fullscreen" | "windowpane"
-  >("fullscreen");
-
-  // Active default pitch per melodic track
-  const [activePitches, setActivePitches] = useState<Record<string, number>>({
-    track_808: 60,
-    track_synth: 60,
-  });
+  const isReady = useDawStore((state) => state.isReady);
+  const setIsReady = useDawStore((state) => state.setIsReady);
+  const isPlaying = useDawStore((state) => state.isPlaying);
+  const bpm = useDawStore((state) => state.bpm);
+  const setBpm = useDawStore((state) => state.setBpm);
+  const masterVolume = useDawStore((state) => state.masterVolume);
+  const setMasterVolume = useDawStore((state) => state.setMasterVolume);
+  const tracks = useDawStore((state) => state.tracks);
+  const activeStep = useDawStore((state) => state.activeStep);
+  const setActiveStep = useDawStore((state) => state.setActiveStep);
+  const containerMode = useDawStore((state) => state.containerMode);
+  const setContainerMode = useDawStore((state) => state.setContainerMode);
+  const setEngine = useDawStore((state) => state.setEngine);
+  const togglePlay = useDawStore((state) => state.togglePlay);
+  const resetPlayhead = useDawStore((state) => state.resetPlayhead);
+  const clearAll = useDawStore((state) => state.clearAll);
+  const reloadDemo = useDawStore((state) => state.reloadDemo);
 
   const engineRef = useRef<AudioEngine | null>(null);
   const stepQueueRef = useRef<{ step: number; time: number }[]>([]);
@@ -171,9 +29,9 @@ export const App: React.FC = () => {
   // 1. Initialize Audio Engine & Preload Default Kit
   useEffect(() => {
     const engine = new AudioEngine();
-    engine.setBpm(130);
+    engine.setBpm(bpm);
     engine.setTotalSteps(64);
-    engine.loadTracks(INITIAL_TRACKS);
+    engine.loadTracks(tracks);
 
     // Queue visual steps for 60fps RAF synchronization
     engine.setVisualStepCallback((step, audioTime) => {
@@ -181,6 +39,7 @@ export const App: React.FC = () => {
     });
 
     engineRef.current = engine;
+    setEngine(engine);
 
     // Load initial sounds
     engine.sampleLoader.loadAllDefaultSamples().then(() => {
@@ -189,7 +48,7 @@ export const App: React.FC = () => {
     });
 
     return () => {
-      engine.stop();
+      engine.destroy();
     };
   }, []);
 
@@ -213,35 +72,15 @@ export const App: React.FC = () => {
 
     animId = requestAnimationFrame(tickPlayhead);
     return () => cancelAnimationFrame(animId);
+  }, [isPlaying, setActiveStep]);
+
+  useEffect(() => {
+    if (!isPlaying) {
+      stepQueueRef.current = [];
+    }
   }, [isPlaying]);
 
-  // Transport Handlers
-  const handleTogglePlay = async () => {
-    if (!engineRef.current || !isReady) return;
-
-    if (isPlaying) {
-      engineRef.current.stop();
-      setIsPlaying(false);
-      setActiveStep(-1);
-      stepQueueRef.current = [];
-    } else {
-      await engineRef.current.play();
-      setIsPlaying(true);
-    }
-  };
-
-  const handleBpmChange = (newBpm: number) => {
-    const clamped = Math.max(60, Math.min(240, newBpm));
-    setBpm(clamped);
-    engineRef.current?.setBpm(clamped);
-  };
-
-  const handleMasterVolChange = (vol: number) => {
-    setMasterVolume(vol);
-    engineRef.current?.setMasterVolume(vol);
-  };
-
-  // Keyboard Shortcuts (Space = Play/Stop)
+  // 3. Power Keyboard Shortcuts (Space = Play/Stop, Home/0 = Rewind)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (
@@ -254,151 +93,16 @@ export const App: React.FC = () => {
 
       if (e.code === "Space") {
         e.preventDefault();
-        handleTogglePlay();
+        togglePlay();
+      } else if (e.code === "Home" || e.key === "0") {
+        e.preventDefault();
+        resetPlayhead();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isPlaying, isReady]);
-
-  // Synchronized Step Update Helper
-  const handleUpdateStep = (
-    trackIndex: number,
-    stepIndex: number,
-    isActive: boolean,
-    midiNote?: number,
-  ) => {
-    setTracks((prev) => {
-      const updated = prev.map((t, idx) => {
-        if (idx !== trackIndex) return t;
-        const newSteps = [...t.steps];
-        const newPitches = [...t.pitches];
-        newSteps[stepIndex] = isActive;
-        if (midiNote !== undefined) {
-          newPitches[stepIndex] = midiNote;
-        }
-        return { ...t, steps: newSteps, pitches: newPitches };
-      });
-      engineRef.current?.setTracks(updated);
-      return updated;
-    });
-  };
-
-  const handleToggleStep = (trackIndex: number, stepIndex: number) => {
-    const track = tracks[trackIndex];
-    if (!track) return;
-    handleUpdateStep(trackIndex, stepIndex, !track.steps[stepIndex]);
-  };
-
-  const handleSetStepPitch = (
-    trackIndex: number,
-    stepIndex: number,
-    midiNote: number,
-  ) => {
-    handleUpdateStep(trackIndex, stepIndex, true, midiNote);
-  };
-
-  const handleRemoveStep = (trackIndex: number, stepIndex: number) => {
-    handleUpdateStep(trackIndex, stepIndex, false);
-  };
-
-  // Track Mixer Controls
-  const handleTrackVolumeChange = (trackIndex: number, vol: number) => {
-    setTracks((prev) => {
-      const updated = prev.map((t, idx) =>
-        idx === trackIndex ? { ...t, volume: vol } : t,
-      );
-      engineRef.current?.setTrackVolume(trackIndex, vol);
-      return updated;
-    });
-  };
-
-  const handleToggleMute = (trackIndex: number) => {
-    if (!engineRef.current) return;
-    setTracks((prev) => {
-      const updated = prev.map((t, idx) =>
-        idx === trackIndex ? { ...t, isMuted: !t.isMuted } : t,
-      );
-      engineRef.current?.setTracks(updated);
-      return updated;
-    });
-  };
-
-  const handleToggleSolo = (trackIndex: number) => {
-    if (!engineRef.current) return;
-    setTracks((prev) => {
-      const updated = prev.map((t, idx) =>
-        idx === trackIndex ? { ...t, isSoloed: !t.isSoloed } : t,
-      );
-      engineRef.current?.setTracks(updated);
-      return updated;
-    });
-  };
-
-  // Sample Swapping (in Sequencer Rack)
-  const handleSampleChange = async (trackIndex: number, sampleId: string) => {
-    if (!engineRef.current) return;
-    const meta = SAMPLE_CATALOG.find((s) => s.id === sampleId);
-    if (!meta) return;
-
-    await engineRef.current.setTrackSample(trackIndex, sampleId);
-
-    setTracks((prev) => {
-      const updated = prev.map((t, idx) =>
-        idx === trackIndex
-          ? { ...t, sampleId: meta.id, name: meta.name, type: meta.type }
-          : t,
-      );
-      engineRef.current?.setTracks(updated);
-      return updated;
-    });
-  };
-
-  // Add / Delete Track (up to 10 max)
-  const handleAddTrack = async (sampleId: string) => {
-    if (!engineRef.current || tracks.length >= 10) return;
-    const meta = SAMPLE_CATALOG.find((s) => s.id === sampleId);
-    if (!meta) return;
-
-    const newTrack = await engineRef.current.addTrack(meta);
-    if (newTrack) {
-      setTracks((prev) => [...prev, newTrack]);
-    }
-  };
-
-  const handleDeleteTrack = (trackIndex: number) => {
-    if (tracks.length <= 1) return;
-    engineRef.current?.removeTrack(trackIndex);
-    setTracks((prev) => prev.filter((_, idx) => idx !== trackIndex));
-  };
-
-  // Audition sample
-  const handleAuditionTrack = (trackIndex: number, midiNote?: number) => {
-    engineRef.current?.auditionTrackStep(trackIndex, midiNote);
-  };
-
-  // Clear & Reset
-  const handleClearAll = () => {
-    setTracks((prev) => {
-      const cleared = prev.map((t) => ({
-        ...t,
-        steps: new Array(64).fill(false),
-      }));
-      engineRef.current?.setTracks(cleared);
-      return cleared;
-    });
-  };
-
-  const handleResetDemo = () => {
-    const clone = INITIAL_TRACKS.map((t) => ({
-      ...t,
-      steps: [...t.steps],
-      pitches: [...t.pitches],
-    }));
-    setTracks(clone);
-    engineRef.current?.setTracks(clone);
-  };
+  }, [togglePlay, resetPlayhead]);
 
   // Active position details for LCD
   const activeBarIndex = activeStep >= 0 ? Math.floor(activeStep / 16) : -1;
@@ -442,7 +146,7 @@ export const App: React.FC = () => {
           {/* Left: Play/Stop & BPM */}
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <button
-              onClick={handleTogglePlay}
+              onClick={togglePlay}
               disabled={!isReady}
               style={{
                 padding: "7px 18px",
@@ -486,7 +190,7 @@ export const App: React.FC = () => {
                 BPM:
               </span>
               <button
-                onClick={() => handleBpmChange(bpm - 5)}
+                onClick={() => setBpm(bpm - 5)}
                 style={{
                   background: "#27272a",
                   color: "#e4e4e7",
@@ -513,7 +217,7 @@ export const App: React.FC = () => {
                 {bpm}
               </span>
               <button
-                onClick={() => handleBpmChange(bpm + 5)}
+                onClick={() => setBpm(bpm + 5)}
                 style={{
                   background: "#27272a",
                   color: "#e4e4e7",
@@ -589,9 +293,7 @@ export const App: React.FC = () => {
                 max="1"
                 step="0.01"
                 value={masterVolume}
-                onChange={(e) =>
-                  handleMasterVolChange(parseFloat(e.target.value))
-                }
+                onChange={(e) => setMasterVolume(parseFloat(e.target.value))}
                 style={{
                   width: "70px",
                   accentColor: "#2563eb",
@@ -706,7 +408,7 @@ export const App: React.FC = () => {
           {/* Quick Actions & Window Mode */}
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <button
-              onClick={handleClearAll}
+              onClick={clearAll}
               style={{
                 background: "#27272a",
                 color: "#f87171",
@@ -722,7 +424,7 @@ export const App: React.FC = () => {
               🗑 CLEAR
             </button>
             <button
-              onClick={handleResetDemo}
+              onClick={reloadDemo}
               style={{
                 background: "#27272a",
                 color: "#93c5fd",
@@ -741,8 +443,8 @@ export const App: React.FC = () => {
             {/* Window Mode Toggle */}
             <button
               onClick={() =>
-                setContainerMode((prev) =>
-                  prev === "fullscreen" ? "windowpane" : "fullscreen",
+                setContainerMode(
+                  containerMode === "fullscreen" ? "windowpane" : "fullscreen",
                 )
               }
               style={{
@@ -778,32 +480,8 @@ export const App: React.FC = () => {
           width: "100%",
         }}
       >
-        <Sequencer
-          tracks={tracks}
-          activeStep={activeStep}
-          activePitches={activePitches}
-          onToggleStep={handleToggleStep}
-          onSetStepPitch={handleSetStepPitch}
-          onRemoveStep={handleRemoveStep}
-          onToggleMute={handleToggleMute}
-          onToggleSolo={handleToggleSolo}
-          onSampleChange={handleSampleChange}
-          onAuditionTrack={handleAuditionTrack}
-          onAddTrack={handleAddTrack}
-          onDeleteTrack={handleDeleteTrack}
-          onActivePitchChange={(id, pitch) =>
-            setActivePitches((prev) => ({ ...prev, [id]: pitch }))
-          }
-        />
-
-        <Mixer
-          tracks={tracks}
-          masterVolume={masterVolume}
-          onMasterVolumeChange={handleMasterVolChange}
-          onTrackVolumeChange={handleTrackVolumeChange}
-          onToggleMute={handleToggleMute}
-          onToggleSolo={handleToggleSolo}
-        />
+        <Sequencer />
+        <Mixer />
       </div>
 
       {/* Compact Status / Tips Footer */}
@@ -821,8 +499,8 @@ export const App: React.FC = () => {
         }}
       >
         <div>
-          💡 <strong>Tips:</strong> Click track name to audition sound • Space:
-          Play/Stop • Drag faders to mix • Max 10 Tracks
+          💡 <strong>Tips:</strong> Space: Play/Stop • Home/0: Rewind • Esc:
+          Dismiss Note • Click track name to audition sound • Max 10 Tracks
         </div>
         <div>tractDAW • Max 10 Tracks • 64 Steps</div>
       </footer>
@@ -1001,7 +679,7 @@ export const App: React.FC = () => {
                   borderRadius: "3px",
                 }}
               >
-                PHASE 3
+                PHASE 4
               </span>
             </h1>
             <div
@@ -1011,8 +689,8 @@ export const App: React.FC = () => {
                 marginTop: "3px",
               }}
             >
-              64-Step Channel Rack • Volume Faders (Solo/Mute) • WindowPane
-              Optimized
+              64-Step Channel Rack • Track Mixer Console • Decoupled State
+              Engine
             </div>
           </div>
 

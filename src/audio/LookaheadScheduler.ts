@@ -79,6 +79,16 @@ export class LookaheadScheduler {
   }
 
   /**
+   * Resets the playhead position to step 0.
+   */
+  public reset(): void {
+    this.currentStep = 0;
+    if (this.isPlaying) {
+      this.nextStepTime = this.audioCtx.currentTime + 0.02;
+    }
+  }
+
+  /**
    * Sets the tempo in Beats Per Minute (clamped between 40 and 240 BPM).
    */
   public setBpm(newBpm: number): void {

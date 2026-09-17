@@ -171,6 +171,7 @@ export interface DawState {
   setActiveStep: (step: number) => void;
   setContainerMode: (mode: "fullscreen" | "windowpane") => void;
   togglePlay: () => Promise<void>;
+  resetPlayhead: () => void;
   setBpm: (bpm: number) => void;
   setMasterVolume: (volume: number) => void;
   toggleStep: (trackIndex: number, stepIndex: number) => void;
@@ -219,6 +220,12 @@ export const useDawStore = create<DawState>((set, get) => ({
       await engine.play();
       set({ isPlaying: true });
     }
+  },
+
+  resetPlayhead: () => {
+    const { engine } = get();
+    engine?.resetPlayhead();
+    set({ activeStep: 0 });
   },
 
   setBpm: (newBpm) => {

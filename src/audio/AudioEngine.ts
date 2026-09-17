@@ -23,6 +23,11 @@ export class AudioEngine {
   private trackGainNodes: GainNode[] = [];
   private tracks: Track[] = [];
 
+  private idleTimer: number | null = null;
+  private readonly IDLE_TIMEOUT_MS = 45000; // 45 seconds idle -> suspend
+  private boundVisibilityHandler: (() => void) | null = null;
+  private isDisposed = false;
+
   constructor() {
     this.audioCtx = new AudioContext();
     this.sampleLoader = new SampleLoader(this.audioCtx);
@@ -46,6 +51,12 @@ export class AudioEngine {
     this.scheduler.setCallbacks((stepIndex, audioTime) => {
       this.onScheduleStep(stepIndex, audioTime);
     });
+
+    // 4. Setup visibility change handler for CPU/battery conservation
+    if (typeof document !== 'undefined') {
+      this.boundVisibilityHandler = () => this.handleVisibilityChange();
+      document.addEventListener('visibilitychange', this.boundVisibilityHandler);
+    }
   }
 
   /**
@@ -97,23 +108,83 @@ export class AudioEngine {
     });
   }
 
+  // --- AudioContext Lifecycle & Power Management ---
+
+  public async suspend(): Promise<void> {
+    this.clearIdleTimer();
+    if (this.audioCtx.state === 'running') {
+      try {
+        await this.audioCtx.suspend();
+      } catch (err) {
+        console.warn('AudioEngine: suspend failed', err);
+      }
+    }
+  }
+
+  public async resume(): Promise<void> {
+    if (this.audioCtx.state === 'suspended') {
+      try {
+        await this.audioCtx.resume();
+      } catch (err) {
+        console.warn('AudioEngine: resume failed', err);
+      }
+    }
+    this.resetIdleTimer();
+  }
+
+  private handleVisibilityChange(): void {
+    if (typeof document === 'undefined') return;
+    if (document.visibilityState === 'hidden') {
+      // When user leaves tab and is not playing, suspend to preserve CPU/battery
+      if (!this.getIsPlaying()) {
+        this.suspend();
+      }
+    } else if (document.visibilityState === 'visible') {
+      // Returning to tab - resume AudioContext
+      this.resume().catch(() => {});
+    }
+  }
+
+  private resetIdleTimer(): void {
+    this.clearIdleTimer();
+    if (this.isDisposed) return;
+    // If not playing and audioCtx is running, schedule suspend after 45s of silence
+    if (!this.getIsPlaying() && this.audioCtx.state === 'running') {
+      this.idleTimer = window.setTimeout(() => {
+        this.suspend();
+      }, this.IDLE_TIMEOUT_MS);
+    }
+  }
+
+  private clearIdleTimer(): void {
+    if (this.idleTimer !== null) {
+      window.clearTimeout(this.idleTimer);
+      this.idleTimer = null;
+    }
+  }
+
   // --- Transport Controls ---
 
   public async play(): Promise<void> {
-    if (this.audioCtx.state === 'suspended') {
-      await this.audioCtx.resume();
-    }
+    this.clearIdleTimer();
+    await this.resume();
     await this.scheduler.start();
   }
 
   public stop(): void {
     this.scheduler.stop();
     this.voiceManager.stopAllVoices();
+    this.resetIdleTimer();
   }
 
   public pause(): void {
     this.scheduler.pause();
     this.voiceManager.stopAllVoices();
+    this.resetIdleTimer();
+  }
+
+  public resetPlayhead(): void {
+    this.scheduler.reset();
   }
 
   public getIsPlaying(): boolean {
@@ -301,9 +372,7 @@ export class AudioEngine {
    * Gives the user immediate audio feedback when clicking steps or notes.
    */
   public auditionTrackStep(trackIndex: number, midiNote?: number): void {
-    if (this.audioCtx.state === 'suspended') {
-      this.audioCtx.resume();
-    }
+    this.resume().catch(() => {});
     const track = this.tracks[trackIndex];
     if (!track) return;
     const buffer = this.sampleLoader.getBuffer(track.sampleId);
@@ -330,6 +399,7 @@ export class AudioEngine {
       this.audioCtx.currentTime,
       options
     );
+    this.resetIdleTimer();
   }
 
   public setVisualStepCallback(cb: VisualStepCallback): void {
@@ -337,6 +407,17 @@ export class AudioEngine {
       (step, time) => this.onScheduleStep(step, time),
       cb
     );
+  }
+
+  public destroy(): void {
+    this.isDisposed = true;
+    this.clearIdleTimer();
+    if (typeof document !== 'undefined' && this.boundVisibilityHandler) {
+      document.removeEventListener('visibilitychange', this.boundVisibilityHandler);
+      this.boundVisibilityHandler = null;
+    }
+    this.stop();
+    this.audioCtx.close().catch(() => {});
   }
 }
 

@@ -1,23 +1,13 @@
 import React from "react";
-import { Track } from "../types";
+import { useDawStore } from "../store/useDawStore";
 
-interface MixerProps {
-  tracks: Track[];
-  masterVolume: number;
-  onMasterVolumeChange: (vol: number) => void;
-  onTrackVolumeChange: (trackIndex: number, vol: number) => void;
-  onToggleMute: (trackIndex: number) => void;
-  onToggleSolo: (trackIndex: number) => void;
-}
-
-export const Mixer: React.FC<MixerProps> = ({
-  tracks,
-  masterVolume,
-  onMasterVolumeChange,
-  onTrackVolumeChange,
-  onToggleMute,
-  onToggleSolo,
-}) => {
+export const Mixer: React.FC = () => {
+  const tracks = useDawStore((state) => state.tracks);
+  const masterVolume = useDawStore((state) => state.masterVolume);
+  const onMasterVolumeChange = useDawStore((state) => state.setMasterVolume);
+  const onTrackVolumeChange = useDawStore((state) => state.setTrackVolume);
+  const onToggleMute = useDawStore((state) => state.toggleMute);
+  const onToggleSolo = useDawStore((state) => state.toggleSolo);
   return (
     <div
       style={{

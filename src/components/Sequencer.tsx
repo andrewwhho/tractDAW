@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { Track } from "../types";
+import React, { useState, useEffect } from "react";
 import { SAMPLE_CATALOG } from "../audio/SampleCatalog";
+import { useDawStore } from "../store/useDawStore";
 
 export const NOTE_OPTIONS = [
   { midi: 48, label: "C3" },
@@ -24,41 +24,21 @@ export const NOTE_NAMES: Record<number, string> = Object.fromEntries(
   NOTE_OPTIONS.map((n) => [n.midi, n.label]),
 );
 
-interface SequencerProps {
-  tracks: Track[];
-  activeStep: number;
-  activePitches: Record<string, number>;
-  onToggleStep: (trackIndex: number, stepIndex: number) => void;
-  onSetStepPitch: (
-    trackIndex: number,
-    stepIndex: number,
-    midiNote: number,
-  ) => void;
-  onRemoveStep: (trackIndex: number, stepIndex: number) => void;
-  onToggleMute: (trackIndex: number) => void;
-  onToggleSolo: (trackIndex: number) => void;
-  onSampleChange: (trackIndex: number, newSampleId: string) => void;
-  onAuditionTrack: (trackIndex: number, midiNote?: number) => void;
-  onAddTrack: (sampleId: string) => void;
-  onDeleteTrack: (trackIndex: number) => void;
-  onActivePitchChange: (trackId: string, pitch: number) => void;
-}
+export const Sequencer: React.FC = () => {
+  const tracks = useDawStore((state) => state.tracks);
+  const activeStep = useDawStore((state) => state.activeStep);
+  const activePitches = useDawStore((state) => state.activePitches);
+  const onToggleStep = useDawStore((state) => state.toggleStep);
+  const onSetStepPitch = useDawStore((state) => state.setStepPitch);
+  const onRemoveStep = useDawStore((state) => state.removeStep);
+  const onToggleMute = useDawStore((state) => state.toggleMute);
+  const onToggleSolo = useDawStore((state) => state.toggleSolo);
+  const onSampleChange = useDawStore((state) => state.setTrackSample);
+  const onAuditionTrack = useDawStore((state) => state.auditionTrack);
+  const onAddTrack = useDawStore((state) => state.addTrack);
+  const onDeleteTrack = useDawStore((state) => state.deleteTrack);
+  const onActivePitchChange = useDawStore((state) => state.setActivePitch);
 
-export const Sequencer: React.FC<SequencerProps> = ({
-  tracks,
-  activeStep,
-  activePitches,
-  onToggleStep,
-  onSetStepPitch,
-  onRemoveStep,
-  onToggleMute,
-  onToggleSolo,
-  onSampleChange,
-  onAuditionTrack,
-  onAddTrack,
-  onDeleteTrack,
-  onActivePitchChange,
-}) => {
   // Pitch picker popover state
   const [pitchPicker, setPitchPicker] = useState<{
     trackIndex: number;
@@ -69,6 +49,18 @@ export const Sequencer: React.FC<SequencerProps> = ({
 
   // Add track dropdown modal state
   const [showAddMenu, setShowAddMenu] = useState(false);
+
+  // Power Shortcut: Escape dismisses note popover or add menu
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (pitchPicker) setPitchPicker(null);
+        if (showAddMenu) setShowAddMenu(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [pitchPicker, showAddMenu]);
 
   // Always 64 Steps (4 Bars of 16th notes)
   const displayedStepIndices = Array.from({ length: 64 }, (_, i) => i);
