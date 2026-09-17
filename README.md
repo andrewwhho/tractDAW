@@ -1,8 +1,11 @@
 # tractDAW: Roadmap and specs
 
-Simple web DAW
+TODOs: 
+- Fallback system using synthetic sounds
+- Tier 2 background preloader
+- Preview pipeline
 
-## Technical Specifications & Mathematical Foundations
+## Technical Specifications
 
 ### 1. 16th-Note Lookahead Timing Interval
 
