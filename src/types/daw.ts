@@ -11,8 +11,10 @@ export type SampleCategory =
   | 'hihats_closed'
   | 'hihats_open'
   | 'percussion'
+  | 'extras'
   | 'keys'
   | 'synths'
+  | '808s'
   | 'bass';
 
 export interface SampleMetadata {

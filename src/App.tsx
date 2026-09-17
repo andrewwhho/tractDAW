@@ -11,12 +11,12 @@ export const App: React.FC = () => {
 
     // 2. Await the async fetch & decode
     await sampleLoader.loadSample(
-      "kick_2",
-      "/audio/samples/drums/kicks/RS Kick 3.wav",
+      "snare_5",
+      "/audio/samples/drums/snares/[SAINT6] Chop Snare 2.wav",
     );
 
     // 3. HERE IS WHERE YOUR SNIPPET GOES:
-    const buffer = sampleLoader.getBuffer("kick_2");
+    const buffer = sampleLoader.getBuffer("snare_5");
 
     if (buffer) {
       const source = audioCtx.createBufferSource();
@@ -24,7 +24,7 @@ export const App: React.FC = () => {
       source.connect(audioCtx.destination);
       source.start();
     } else {
-      console.error(`❌ Failed to load: kick_1 is undefined`);
+      console.error(`❌ Failed to load: snare_5 is undefined`);
     }
   };
 
