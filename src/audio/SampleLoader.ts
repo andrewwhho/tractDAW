@@ -25,8 +25,14 @@ export class SampleLoader {
     }
 
     try {
+      // Resolve base URL for subpath hosting (e.g. GitHub Pages or root domains)
+      const base = (import.meta.env?.BASE_URL || './').replace(/\/$/, '');
+      const fullUrl = url.startsWith('/')
+        ? (base === '.' ? `.${url}` : `${base}${url}`)
+        : url;
+
       // Encode URL to handle spaces in filenames safely
-      const encodedUrl = encodeURI(url);
+      const encodedUrl = encodeURI(fullUrl);
       const response = await fetch(encodedUrl);
       if (!response.ok) {
         throw new Error(`HTTP ${response.status} ${response.statusText} for URL: ${url}`);
