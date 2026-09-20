@@ -278,8 +278,8 @@ export const App: React.FC = () => {
               title="Toggle between Fullscreen and Portfolio WindowPane simulation (1280x720)"
             >
               {containerMode === "windowpane"
-                ? "🪟 WINDOWPANE (1280×720)"
-                : "🖥️ FULLSCREEN"}
+                ? "WINDOWPANE (1280×720)"
+                : "FULLSCREEN"}
             </button>
           </div>
         </div>
@@ -371,7 +371,7 @@ export const App: React.FC = () => {
               className="bg-zinc-900 hover:bg-zinc-800 border border-blue-500 text-blue-300 rounded px-2.5 py-1 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
               title="Preview inside portfolio WindowPane (1280x720)"
             >
-              🪟 PREVIEW IN WINDOWPANE (1280×720)
+              PREVIEW IN WINDOWPANE (1280×720)
             </button>
           </div>
         </header>

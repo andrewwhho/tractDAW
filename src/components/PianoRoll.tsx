@@ -179,7 +179,7 @@ export const PianoRoll: React.FC = () => {
           className="flex-1 overflow-y-auto overflow-x-auto flex relative bg-zinc-950"
         >
           {/* 1. Left Authentic Piano Keys Column (74px width) */}
-          <div className="w-[74px] shrink-0 bg-zinc-950 border-r-2 border-zinc-800 sticky left-0 z-10">
+          <div className="w-[74px] shrink-0 bg-zinc-950 border-r-2 border-zinc-800 sticky left-0 z-20 flex flex-col">
             {PITCH_RANGE.map((midi) => {
               const isBlack = isBlackKey(midi);
               const label = getNoteLabel(midi);
@@ -198,7 +198,7 @@ export const PianoRoll: React.FC = () => {
                 <div
                   key={midi}
                   onClick={() => auditionTrack(trackIndex, midi)}
-                  className="h-5 box-border flex items-stretch cursor-pointer relative"
+                  className="h-[20px] min-h-[20px] max-h-[20px] shrink-0 box-border flex items-stretch cursor-pointer relative"
                   title={`Click to audition ${label}`}
                 >
                   {isBlack ? (
@@ -220,7 +220,7 @@ export const PianoRoll: React.FC = () => {
                     <>
                       {/* White Key Left Area (Between Black Keys) */}
                       <div
-                        className={`w-[44px] h-5 shrink-0 transition-colors ${
+                        className={`w-[44px] h-[20px] shrink-0 box-border transition-colors ${
                           isCurrentlyPlaying ? "bg-blue-200" : "bg-[#f2f2f6]"
                         } ${
                           isEFBoundary || isBCBoundary
@@ -262,7 +262,7 @@ export const PianoRoll: React.FC = () => {
           </div>
 
           {/* 2. Right Note Matrix Grid (64 Columns x 37 Pitch Rows) */}
-          <div className="flex-1 min-w-[832px] flex flex-col relative">
+          <div className="flex-1 min-w-[832px] shrink-0 flex flex-col relative">
             {/* Playhead Vertical Overlay Line */}
             {activeStep >= 0 && (
               <div
@@ -280,7 +280,7 @@ export const PianoRoll: React.FC = () => {
               return (
                 <div
                   key={midi}
-                  className={`h-5 box-border grid border-b border-zinc-900 ${
+                  className={`h-[20px] min-h-[20px] max-h-[20px] shrink-0 box-border grid border-b border-zinc-900 ${
                     isBlack ? "bg-zinc-950" : "bg-[#191920]"
                   }`}
                   style={{

@@ -107,6 +107,7 @@ input[type="range"].vertical-fader {
   width: 44px;
   height: 18px;
   margin: 1px 0;
+  box-sizing: border-box;
   background: linear-gradient(90deg, #18181c 0%, #26262e 70%, #353540 100%);
   border-radius: 0 3px 3px 0;
   border-right: 1px solid #101014;
@@ -125,6 +126,7 @@ input[type="range"].vertical-fader {
 .piano-key-3d-white-body {
   flex: 1;
   height: 20px;
+  box-sizing: border-box;
   background: #eaeaf0;
   border-right: 1px solid #27272a;
   border-bottom: 1px solid #d4d4dc;
