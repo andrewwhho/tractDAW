@@ -10,22 +10,34 @@ export const createTrack = (
   type: "drum" | "melodic",
   sampleId: string,
   activeIndices: number[],
-  pitchesMap: Record<number, number> = {},
+  pitchesMap: Record<number, number | number[]> = {},
   volume = 0.8
 ): Track => {
   const steps = new Array(64).fill(false);
   const pitches = new Array(64).fill(60);
+  const notes: number[][] = Array.from({ length: 64 }, () => []);
+
   activeIndices.forEach((idx) => {
     if (idx >= 0 && idx < 64) {
       steps[idx] = true;
+      notes[idx] = [60];
     }
   });
-  Object.entries(pitchesMap).forEach(([idxStr, note]) => {
+
+  Object.entries(pitchesMap).forEach(([idxStr, noteVal]) => {
     const idx = parseInt(idxStr, 10);
     if (idx >= 0 && idx < 64) {
-      pitches[idx] = note;
+      if (Array.isArray(noteVal)) {
+        notes[idx] = [...noteVal].sort((a, b) => a - b);
+        pitches[idx] = notes[idx][0] ?? 60;
+      } else {
+        notes[idx] = [noteVal];
+        pitches[idx] = noteVal;
+      }
+      steps[idx] = true;
     }
   });
+
   return {
     id,
     name,
@@ -36,6 +48,7 @@ export const createTrack = (
     isSoloed: false,
     steps,
     pitches,
+    notes,
   };
 };
 
@@ -133,14 +146,14 @@ export const INITIAL_TRACKS: Track[] = [
     "synth_1",
     [0, 8, 16, 24, 32, 40, 48, 56],
     {
-      0: 60,  // C4
-      8: 63,  // D#4
-      16: 60, // C4
-      24: 67, // G4
-      32: 68, // G#4
-      40: 65, // F4
-      48: 60, // C4
-      56: 63, // D#4
+      0: [60, 63, 67],  // C minor triad (C4, D#4, G4)
+      8: [63, 67, 70],  // D# major triad (D#4, G4, A#4)
+      16: [60, 63, 67], // C minor triad
+      24: [65, 68, 72], // F minor triad (F4, G#4, C5)
+      32: [68, 72, 75], // G# major triad (G#4, C5, D#5)
+      40: [65, 68, 72], // F minor triad
+      48: [60, 63, 67], // C minor triad
+      56: [63, 67, 70], // D# major triad
     },
     0.65
   ),
@@ -224,25 +237,43 @@ export const useDawStore = create<DawState>((set, get) => ({
 
     const newSteps = [...track.steps];
     const newPitches = [...track.pitches];
+    const newNotes: number[][] = track.notes
+      ? track.notes.map((arr) => [...arr])
+      : Array.from({ length: 64 }, (_, i) =>
+          track.steps[i] ? [track.pitches[i] ?? 60] : []
+        );
 
-    const isCurrentActive = newSteps[stepIndex] && newPitches[stepIndex] === midiNote;
+    const chord = newNotes[stepIndex] || [];
+    const noteExists = chord.includes(midiNote);
 
-    if (isCurrentActive) {
-      newSteps[stepIndex] = false;
+    if (noteExists) {
+      // Remove this note from the chord
+      const updatedChord = chord.filter((n) => n !== midiNote);
+      newNotes[stepIndex] = updatedChord;
+      if (updatedChord.length === 0) {
+        newSteps[stepIndex] = false;
+      } else {
+        newPitches[stepIndex] = updatedChord[0];
+      }
     } else {
+      // Add this note to chord and sort ascending
+      const updatedChord = [...chord, midiNote].sort((a, b) => a - b);
+      newNotes[stepIndex] = updatedChord;
       newSteps[stepIndex] = true;
-      newPitches[stepIndex] = midiNote;
+      newPitches[stepIndex] = updatedChord[0];
       engine?.auditionTrackStep(trackIndex, midiNote);
     }
 
     const updatedTracks = tracks.map((t, idx) =>
-      idx === trackIndex ? { ...t, steps: newSteps, pitches: newPitches } : t
+      idx === trackIndex
+        ? { ...t, steps: newSteps, pitches: newPitches, notes: newNotes }
+        : t
     );
 
     engine?.setTracks(updatedTracks);
     set({
       tracks: updatedTracks,
-      activePitches: isCurrentActive
+      activePitches: noteExists
         ? activePitches
         : { ...activePitches, [track.id]: midiNote },
     });
@@ -280,15 +311,33 @@ export const useDawStore = create<DawState>((set, get) => ({
   },
 
   toggleStep: (trackIndex, stepIndex) => {
-    const { tracks, engine } = get();
+    const { tracks, engine, activePitches } = get();
     const track = tracks[trackIndex];
     if (!track) return;
 
     const newSteps = [...track.steps];
+    const newNotes: number[][] = track.notes
+      ? track.notes.map((arr) => [...arr])
+      : Array.from({ length: 64 }, (_, i) =>
+          track.steps[i] ? [track.pitches[i] ?? 60] : []
+        );
+
     newSteps[stepIndex] = !newSteps[stepIndex];
 
+    if (newSteps[stepIndex]) {
+      if (newNotes[stepIndex].length === 0) {
+        const defaultPitch =
+          activePitches[track.id] ?? track.pitches[stepIndex] ?? 60;
+        newNotes[stepIndex] = [defaultPitch];
+      }
+    } else {
+      newNotes[stepIndex] = [];
+    }
+
     const updatedTracks = tracks.map((t, idx) =>
-      idx === trackIndex ? { ...t, steps: newSteps } : t
+      idx === trackIndex
+        ? { ...t, steps: newSteps, notes: newNotes }
+        : t
     );
 
     engine?.setTracks(updatedTracks);
@@ -302,11 +351,20 @@ export const useDawStore = create<DawState>((set, get) => ({
 
     const newSteps = [...track.steps];
     const newPitches = [...track.pitches];
+    const newNotes: number[][] = track.notes
+      ? track.notes.map((arr) => [...arr])
+      : Array.from({ length: 64 }, (_, i) =>
+          track.steps[i] ? [track.pitches[i] ?? 60] : []
+        );
+
     newSteps[stepIndex] = true;
     newPitches[stepIndex] = midiNote;
+    newNotes[stepIndex] = [midiNote];
 
     const updatedTracks = tracks.map((t, idx) =>
-      idx === trackIndex ? { ...t, steps: newSteps, pitches: newPitches } : t
+      idx === trackIndex
+        ? { ...t, steps: newSteps, pitches: newPitches, notes: newNotes }
+        : t
     );
 
     engine?.setTracks(updatedTracks);
@@ -319,10 +377,19 @@ export const useDawStore = create<DawState>((set, get) => ({
     if (!track) return;
 
     const newSteps = [...track.steps];
+    const newNotes: number[][] = track.notes
+      ? track.notes.map((arr) => [...arr])
+      : Array.from({ length: 64 }, (_, i) =>
+          track.steps[i] ? [track.pitches[i] ?? 60] : []
+        );
+
     newSteps[stepIndex] = false;
+    newNotes[stepIndex] = [];
 
     const updatedTracks = tracks.map((t, idx) =>
-      idx === trackIndex ? { ...t, steps: newSteps } : t
+      idx === trackIndex
+        ? { ...t, steps: newSteps, notes: newNotes }
+        : t
     );
 
     engine?.setTracks(updatedTracks);
@@ -421,6 +488,7 @@ export const useDawStore = create<DawState>((set, get) => ({
     const cleared = tracks.map((t) => ({
       ...t,
       steps: new Array(64).fill(false),
+      notes: Array.from({ length: 64 }, () => []),
     }));
 
     engine?.setTracks(cleared);
@@ -433,6 +501,7 @@ export const useDawStore = create<DawState>((set, get) => ({
       ...t,
       steps: [...t.steps],
       pitches: [...t.pitches],
+      notes: t.notes ? t.notes.map((arr) => [...arr]) : Array.from({ length: 64 }, () => []),
     }));
 
     engine?.setTracks(clone);

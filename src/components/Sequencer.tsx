@@ -93,7 +93,14 @@ export const Sequencer: React.FC = () => {
           activePitches[track.id] ?? track.pitches[globalStepIdx] ?? 60;
         onSetStepPitch(trackIdx, globalStepIdx, pitchToUse);
       } else {
-        // Step is already ON: open note picker to change note or delete
+        const chordNotes = track.notes?.[globalStepIdx];
+        if (chordNotes && chordNotes.length > 1) {
+          // If it's a chord, open Piano Roll to edit polyphonic chord
+          openPianoRoll(track.id);
+          return;
+        }
+
+        // Single note: open note picker to change note or delete
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
         setPitchPicker({
           trackIndex: trackIdx,
@@ -207,6 +214,33 @@ export const Sequencer: React.FC = () => {
                     flexShrink: 0,
                   }}
                 >
+                  {/* FL Studio Green Glowing LED Mute/Activity Light */}
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleMute(trackIdx);
+                    }}
+                    style={{
+                      width: "8px",
+                      height: "8px",
+                      borderRadius: "50%",
+                      background: track.isMuted ? "#27272a" : "#22c55e",
+                      boxShadow: track.isMuted
+                        ? "inset 0 1px 2px rgba(0, 0, 0, 0.8)"
+                        : "0 0 7px #22c55e, inset 0 1px 1px #86efac",
+                      border:
+                        "1px solid " + (track.isMuted ? "#18181b" : "#16a34a"),
+                      cursor: "pointer",
+                      flexShrink: 0,
+                      transition: "all 0.15s ease",
+                    }}
+                    title={
+                      track.isMuted
+                        ? "Unmute Track (Click LED)"
+                        : "Mute Track (Click LED)"
+                    }
+                  />
+
                   <button
                     onClick={() => onToggleMute(trackIdx)}
                     style={{
@@ -367,8 +401,19 @@ export const Sequencer: React.FC = () => {
                       globalStepIdx % 16 === 0 && globalStepIdx !== 0;
                     const isCurrent = activeStep === globalStepIdx;
                     const pitch = track.pitches[globalStepIdx] ?? 60;
+                    const chordNotes = track.notes?.[globalStepIdx]?.length
+                      ? track.notes[globalStepIdx]
+                      : isActive
+                        ? [pitch]
+                        : [];
+                    const isChord =
+                      isMelodic && isActive && chordNotes.length > 1;
                     const pitchName =
-                      isMelodic && isActive ? NOTE_NAMES[pitch] || "C4" : null;
+                      isMelodic && isActive
+                        ? isChord
+                          ? `${chordNotes.length}N`
+                          : NOTE_NAMES[pitch] || "C4"
+                        : null;
 
                     return (
                       <button
@@ -391,46 +436,62 @@ export const Sequencer: React.FC = () => {
                           borderRadius: "3px",
                           border: isCurrent
                             ? "1px solid #60a5fa"
-                            : "1px solid transparent",
+                            : "1px solid rgba(0, 0, 0, 0.45)",
                           borderLeft: isBarBoundary
                             ? "2px solid #3b82f6"
                             : isCurrent
                               ? "1px solid #60a5fa"
-                              : "1px solid transparent",
+                              : "1px solid rgba(0, 0, 0, 0.45)",
                           background: isActive
                             ? isMelodic
-                              ? "#8b5cf6"
-                              : "#f4f4f5"
+                              ? isChord
+                                ? "linear-gradient(180deg, #f472b6 0%, #a855f7 100%)"
+                                : "linear-gradient(180deg, #c084fc 0%, #9333ea 100%)"
+                              : "linear-gradient(180deg, #ffffff 0%, #d4d4d8 100%)"
                             : isBeatGroupA
-                              ? "#222226"
-                              : "#2d2d33",
+                              ? "#38383e"
+                              : "#242428",
                           color: isActive
                             ? isMelodic
-                              ? "#fff"
-                              : "#000"
+                              ? "#ffffff"
+                              : "#18181b"
                             : "#71717a",
                           fontSize: "8px",
                           fontWeight: "bold",
+                          fontFamily: "monospace",
                           cursor: "pointer",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          boxShadow:
-                            isActive && isCurrent ? "0 0 10px #60a5fa" : "none",
-                          transform: isCurrent ? "scale(1.04)" : "none",
-                          transition: "transform 0.04s",
+                          boxShadow: isActive
+                            ? isCurrent
+                              ? "0 0 10px #60a5fa, inset 0 1px 0 rgba(255, 255, 255, 0.5)"
+                              : isChord
+                                ? "0 0 6px rgba(244, 114, 182, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.4)"
+                                : "inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 3px rgba(0, 0, 0, 0.5)"
+                            : isBeatGroupA
+                              ? "inset 1px 1px 0 rgba(255, 255, 255, 0.12), inset -1px -1px 0 rgba(0, 0, 0, 0.4)"
+                              : "inset 1px 1px 0 rgba(255, 255, 255, 0.06), inset -1px -1px 0 rgba(0, 0, 0, 0.5)",
+                          transform: isCurrent ? "scale(1.05)" : "none",
+                          transition: "transform 0.04s, background 0.1s",
                           padding: 0,
                           position: "relative",
                         }}
                         title={
                           isActive
                             ? isMelodic
-                              ? `Step ${globalStepIdx + 1}: ${pitchName} (Click to change note / Shift-click or Right-click to remove)`
+                              ? isChord
+                                ? `Step ${globalStepIdx + 1}: Chord [${chordNotes.map((n) => NOTE_NAMES[n] || n).join(", ")}] (${chordNotes.length} notes) • Click to open Piano Roll / Right-click to remove`
+                                : `Step ${globalStepIdx + 1}: ${NOTE_NAMES[pitch] || "C4"} (Click to change note / Shift-click or Right-click to remove)`
                               : `Step ${globalStepIdx + 1}: Active (Click to remove)`
                             : `Step ${globalStepIdx + 1}: Empty (Click to add note)`
                         }
                       >
-                        {pitchName ? pitchName.slice(0, 2) : ""}
+                        {pitchName
+                          ? isChord
+                            ? pitchName
+                            : pitchName.slice(0, 2)
+                          : ""}
                       </button>
                     );
                   })}
@@ -572,25 +633,49 @@ export const Sequencer: React.FC = () => {
             >
               STEP {pitchPicker.stepIndex + 1} NOTE:
             </span>
-            <button
-              onClick={() => {
-                onRemoveStep(pitchPicker.trackIndex, pitchPicker.stepIndex);
-                setPitchPicker(null);
-              }}
-              style={{
-                background: "#ef4444",
-                color: "#fff",
-                border: "none",
-                borderRadius: "3px",
-                fontSize: "10px",
-                fontWeight: "bold",
-                padding: "2px 6px",
-                cursor: "pointer",
-              }}
-              title="Remove this note trigger"
-            >
-              ✕ DELETE
-            </button>
+            <div style={{ display: "flex", gap: "4px" }}>
+              <button
+                onClick={() => {
+                  const targetTrack = tracks[pitchPicker.trackIndex];
+                  if (targetTrack) {
+                    openPianoRoll(targetTrack.id);
+                  }
+                  setPitchPicker(null);
+                }}
+                style={{
+                  background: "#7c3aed",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "3px",
+                  fontSize: "10px",
+                  fontWeight: "bold",
+                  padding: "2px 6px",
+                  cursor: "pointer",
+                }}
+                title="Open Piano Roll to compose chords"
+              >
+                🎹 ROLLS
+              </button>
+              <button
+                onClick={() => {
+                  onRemoveStep(pitchPicker.trackIndex, pitchPicker.stepIndex);
+                  setPitchPicker(null);
+                }}
+                style={{
+                  background: "#ef4444",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "3px",
+                  fontSize: "10px",
+                  fontWeight: "bold",
+                  padding: "2px 6px",
+                  cursor: "pointer",
+                }}
+                title="Remove this note trigger"
+              >
+                ✕ DELETE
+              </button>
+            </div>
           </div>
 
           {/* Grid of Note Buttons */}

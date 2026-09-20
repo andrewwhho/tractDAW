@@ -46,5 +46,6 @@ export interface Track {
   isSoloed: boolean;
   steps: boolean[];    // Array of active triggers (e.g. 64 elements for 16 beats / 4 bars)
   pitches: number[];   // Array of MIDI note numbers (default 60 = C4)
+  notes?: number[][];  // Multi-note polyphony / chords per step (e.g. [60, 64, 67] for C-E-G)
 }
 

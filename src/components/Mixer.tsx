@@ -135,6 +135,35 @@ export const Mixer: React.FC = () => {
           </div>
         </div>
 
+        {/* Slim dB Scale Ruler */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            alignItems: "center",
+            height: "90px",
+            fontSize: "8px",
+            color: "#52525b",
+            fontFamily: "monospace",
+            fontWeight: "bold",
+            alignSelf: "center",
+            userSelect: "none",
+            padding: "0 2px",
+            flexShrink: 0,
+          }}
+          title="Fader dB Scale"
+        >
+          <span style={{ color: "#ef4444" }}>+3</span>
+          <span style={{ color: "#60a5fa" }}>0dB</span>
+          <span>-3</span>
+          <span>-6</span>
+          <span>-12</span>
+          <span>-18</span>
+          <span>-24</span>
+          <span>-∞</span>
+        </div>
+
         {/* Vertical Divider */}
         <div
           style={{
@@ -144,7 +173,7 @@ export const Mixer: React.FC = () => {
           }}
         />
 
-        {/* Track Channel Strips (1 to 10) */}
+        {/* Track Channel Strips (Insert 1 to 10) */}
         {tracks.map((track, idx) => {
           const isMelodic = track.type === "melodic";
 
@@ -152,7 +181,7 @@ export const Mixer: React.FC = () => {
             <div
               key={track.id}
               style={{
-                width: "78px",
+                width: "82px",
                 background: "#18181b",
                 border: "1px solid #27272a",
                 borderRadius: "6px",
@@ -168,14 +197,39 @@ export const Mixer: React.FC = () => {
             >
               {/* Channel Label */}
               <div style={{ textAlign: "center", width: "100%" }}>
+                {/* FL Studio Green Glowing LED Mute Light */}
+                <div
+                  onClick={() => onToggleMute(idx)}
+                  style={{
+                    width: "8px",
+                    height: "8px",
+                    borderRadius: "50%",
+                    background: track.isMuted ? "#27272a" : "#22c55e",
+                    boxShadow: track.isMuted
+                      ? "inset 0 1px 2px rgba(0, 0, 0, 0.8)"
+                      : "0 0 6px #22c55e, inset 0 1px 1px #86efac",
+                    border:
+                      "1px solid " + (track.isMuted ? "#18181b" : "#16a34a"),
+                    cursor: "pointer",
+                    margin: "0 auto 4px auto",
+                    transition: "all 0.15s ease",
+                  }}
+                  title={
+                    track.isMuted
+                      ? "Unmute Track (Click LED)"
+                      : "Mute Track (Click LED)"
+                  }
+                />
+
                 <div
                   style={{
                     fontSize: "9px",
-                    color: "#71717a",
+                    color: "#38bdf8",
                     fontWeight: "bold",
+                    letterSpacing: "0.5px",
                   }}
                 >
-                  CH {idx + 1}
+                  INSERT {idx + 1}
                 </div>
                 <div
                   style={{

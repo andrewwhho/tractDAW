@@ -89,22 +89,38 @@ export class AudioEngine {
       };
 
       if (track.type === 'melodic') {
-        options.midiNote = track.pitches[stepIndex] ?? 60;
-        options.rootNote = meta?.rootMidiNote ?? 60;
+        const stepNotes = track.notes?.[stepIndex]?.length
+          ? track.notes[stepIndex]
+          : [track.pitches[stepIndex] ?? 60];
 
         // Auto-choke for bass & 808s ("Cut Itself")
         if (is808OrBass) {
           options.shouldChoke = true;
           options.chokeKey = `choke_${track.id}`;
         }
-      }
 
-      this.voiceManager.triggerVoice(
-        buffer,
-        trackDestination,
-        audioTime,
-        options
-      );
+        // Trigger voices for all notes in the chord (polyphony)
+        stepNotes.forEach((midi) => {
+          this.voiceManager.triggerVoice(
+            buffer,
+            trackDestination,
+            audioTime,
+            {
+              ...options,
+              midiNote: midi,
+              rootNote: meta?.rootMidiNote ?? 60,
+            }
+          );
+        });
+      } else {
+        // Drum one-shot
+        this.voiceManager.triggerVoice(
+          buffer,
+          trackDestination,
+          audioTime,
+          options
+        );
+      }
     });
   }
 
@@ -313,6 +329,7 @@ export class AudioEngine {
       isSoloed: false,
       steps: new Array(this.getTotalSteps()).fill(false),
       pitches: new Array(this.getTotalSteps()).fill(meta.rootMidiNote ?? 60),
+      notes: Array.from({ length: this.getTotalSteps() }, () => []),
     };
 
     this.tracks.push(newTrack);

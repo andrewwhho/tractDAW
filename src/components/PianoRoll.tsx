@@ -221,7 +221,7 @@ export const PianoRoll: React.FC = () => {
             display: "flex",
             alignItems: "center",
             flexShrink: 0,
-            paddingLeft: "70px", // Align with keyboard width
+            paddingLeft: "74px", // Align with 74px keyboard width
           }}
         >
           <div
@@ -283,10 +283,10 @@ export const PianoRoll: React.FC = () => {
             background: "#121215",
           }}
         >
-          {/* 1. Left Piano Keys Column */}
+          {/* 1. Left Authentic Piano Keys Column (74px width) */}
           <div
             style={{
-              width: "70px",
+              width: "74px",
               flexShrink: 0,
               background: "#16161a",
               borderRight: "2px solid #27272a",
@@ -299,6 +299,15 @@ export const PianoRoll: React.FC = () => {
               const isBlack = isBlackKey(midi);
               const label = getNoteLabel(midi);
               const isC = midi % 12 === 0;
+              const isEFBoundary = midi % 12 === 5; // F is above E
+              const isBCBoundary = midi % 12 === 0; // C is above B
+              const activeStepNotes = track.notes?.[activeStep]?.length
+                ? track.notes[activeStep]
+                : [track.pitches[activeStep]];
+              const isCurrentlyPlaying =
+                activeStep >= 0 &&
+                track.steps[activeStep] &&
+                activeStepNotes.includes(midi);
 
               return (
                 <div
@@ -308,34 +317,102 @@ export const PianoRoll: React.FC = () => {
                     height: "20px",
                     boxSizing: "border-box",
                     display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "0 6px",
-                    background: isBlack ? "#1e1e24" : "#e4e4e7",
-                    color: isBlack ? "#d4d4d8" : "#18181b",
-                    borderBottom: "1px solid #27272a",
-                    fontSize: isC ? "10px" : "9px",
-                    fontWeight: isC ? "bold" : "normal",
+                    alignItems: "stretch",
                     cursor: "pointer",
-                    boxShadow: isBlack
-                      ? "inset 0 -1px 2px rgba(0,0,0,0.5)"
-                      : "none",
+                    position: "relative",
                   }}
                   title={`Click to audition ${label}`}
                 >
-                  <span>{label}</span>
-                  {isC && (
-                    <span
-                      style={{
-                        fontSize: "8px",
-                        background: "#3b82f6",
-                        color: "#fff",
-                        padding: "1px 3px",
-                        borderRadius: "2px",
-                      }}
-                    >
-                      C
-                    </span>
+                  {isBlack ? (
+                    <>
+                      {/* Black Key: Elevated 3D Protrusion from Left Edge */}
+                      <div
+                        style={{
+                          width: "44px",
+                          height: "18px",
+                          margin: "1px 0",
+                          background: isCurrentlyPlaying
+                            ? "#3b82f6"
+                            : "linear-gradient(90deg, #18181c 0%, #26262e 70%, #353540 100%)",
+                          borderRadius: "0 3px 3px 0",
+                          borderRight: "1px solid #101014",
+                          borderTop: "1px solid #3f3f46",
+                          borderBottom: "1px solid #09090b",
+                          boxShadow: isCurrentlyPlaying
+                            ? "0 0 10px #3b82f6"
+                            : "1px 2px 3px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.15)",
+                          zIndex: 2,
+                          flexShrink: 0,
+                          transition: "background 0.05s",
+                        }}
+                      />
+                      {/* White Key Body Underneath (Right Side) */}
+                      <div
+                        style={{
+                          flex: 1,
+                          height: "20px",
+                          background: isCurrentlyPlaying
+                            ? "#bfdbfe"
+                            : "#e4e4ea",
+                          borderRight: "1px solid #27272a",
+                          borderBottom: "1px solid #d4d4dc",
+                        }}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      {/* White Key Left Area (Between Black Keys) */}
+                      <div
+                        style={{
+                          width: "44px",
+                          height: "20px",
+                          background: isCurrentlyPlaying
+                            ? "#bfdbfe"
+                            : "#f2f2f6",
+                          boxShadow:
+                            "inset 0 1px 0 #ffffff, inset 0 -1px 0 #d4d4dc",
+                          borderBottom:
+                            isEFBoundary || isBCBoundary
+                              ? "1px solid #a1a1aa"
+                              : "1px solid #d4d4dc",
+                          flexShrink: 0,
+                          transition: "background 0.05s",
+                        }}
+                      />
+                      {/* White Key Right Area (Next to Grid) with Octave Label on C */}
+                      <div
+                        style={{
+                          flex: 1,
+                          height: "20px",
+                          background: isCurrentlyPlaying
+                            ? "#bfdbfe"
+                            : "#eaeaf0",
+                          borderRight: "1px solid #27272a",
+                          borderBottom:
+                            isEFBoundary || isBCBoundary
+                              ? "1px solid #a1a1aa"
+                              : "1px solid #d4d4dc",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          paddingRight: "2px",
+                          transition: "background 0.05s",
+                        }}
+                      >
+                        {isC && (
+                          <span
+                            style={{
+                              fontSize: "10px",
+                              fontWeight: "bold",
+                              color: isCurrentlyPlaying ? "#1e3a8a" : "#475569",
+                              fontFamily: "monospace",
+                            }}
+                          >
+                            {label}
+                          </span>
+                        )}
+                      </div>
+                    </>
                   )}
                 </div>
               );
@@ -388,9 +465,13 @@ export const PianoRoll: React.FC = () => {
                     const isBarStart = stepIdx % 16 === 0;
                     const isBeatStart = stepIdx % 4 === 0;
 
-                    // Check if this step has an active note at this exact pitch
-                    const hasNote =
-                      track.steps[stepIdx] && track.pitches[stepIdx] === midi;
+                    // Check if this step has an active note at this exact pitch (supports chords)
+                    const stepNotes = track.notes?.[stepIdx]?.length
+                      ? track.notes[stepIdx]
+                      : track.steps[stepIdx]
+                        ? [track.pitches[stepIdx]]
+                        : [];
+                    const hasNote = stepNotes.includes(midi);
 
                     return (
                       <div
