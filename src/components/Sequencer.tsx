@@ -2,21 +2,32 @@ import React, { useState, useEffect } from "react";
 import { SAMPLE_CATALOG } from "../audio/SampleCatalog";
 import { useDawStore } from "../store/useDawStore";
 
+// 2 Chromatic Octaves for the Step Picker: C3 (48) up to C5 (72)
 export const NOTE_OPTIONS = [
   { midi: 48, label: "C3" },
+  { midi: 49, label: "C#3" },
   { midi: 50, label: "D3" },
   { midi: 51, label: "D#3" },
+  { midi: 52, label: "E3" },
   { midi: 53, label: "F3" },
+  { midi: 54, label: "F#3" },
   { midi: 55, label: "G3" },
   { midi: 56, label: "G#3" },
+  { midi: 57, label: "A3" },
   { midi: 58, label: "A#3" },
+  { midi: 59, label: "B3" },
   { midi: 60, label: "C4" },
+  { midi: 61, label: "C#4" },
   { midi: 62, label: "D4" },
   { midi: 63, label: "D#4" },
+  { midi: 64, label: "E4" },
   { midi: 65, label: "F4" },
+  { midi: 66, label: "F#4" },
   { midi: 67, label: "G4" },
   { midi: 68, label: "G#4" },
+  { midi: 69, label: "A4" },
   { midi: 70, label: "A#4" },
+  { midi: 71, label: "B4" },
   { midi: 72, label: "C5" },
 ];
 
@@ -63,10 +74,9 @@ export const Sequencer: React.FC = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [pitchPicker, showAddMenu]);
 
-  // Always 64 Steps (4 Bars of 16th notes)
+  // Permanent 64-step array [0..63]
   const displayedStepIndices = Array.from({ length: 64 }, (_, i) => i);
 
-  // Step click: silent placement (no audition on click)
   const handleStepClick = (
     e: React.MouseEvent,
     trackIdx: number,
@@ -75,32 +85,26 @@ export const Sequencer: React.FC = () => {
     const track = tracks[trackIdx];
     if (!track) return;
 
-    // Shift-click quick remove
-    if (e.shiftKey && track.steps[globalStepIdx]) {
+    if (e.shiftKey) {
       onRemoveStep(trackIdx, globalStepIdx);
       setPitchPicker(null);
       return;
     }
 
     if (track.type === "drum") {
-      // Drum track: toggle on/off silently
       onToggleStep(trackIdx, globalStepIdx);
     } else {
-      // Melodic track:
       if (!track.steps[globalStepIdx]) {
-        // Turning ON empty step silently using current track pitch
         const pitchToUse =
           activePitches[track.id] ?? track.pitches[globalStepIdx] ?? 60;
         onSetStepPitch(trackIdx, globalStepIdx, pitchToUse);
       } else {
         const chordNotes = track.notes?.[globalStepIdx];
         if (chordNotes && chordNotes.length > 1) {
-          // If it's a chord, open Piano Roll to edit polyphonic chord
           openPianoRoll(track.id);
           return;
         }
 
-        // Single note: open note picker to change note or delete
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
         setPitchPicker({
           trackIndex: trackIdx,
@@ -115,44 +119,19 @@ export const Sequencer: React.FC = () => {
   return (
     <div
       onClick={() => pitchPicker && setPitchPicker(null)}
-      style={{ width: "100%", boxSizing: "border-box" }}
+      className="w-full box-border"
     >
       {/* 64-Step Sequencer Rack */}
-      <section
-        style={{
-          background: "#121215",
-          border: "1px solid #27272a",
-          borderRadius: "6px",
-          padding: "12px 14px",
-          overflowX: "auto",
-        }}
-      >
+      <section className="bg-zinc-950/90 border border-zinc-800 rounded-md p-3 sm:px-3.5 overflow-x-auto">
         {/* Step Indicator Header LEDs */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            marginBottom: "10px",
-          }}
-        >
-          <div
-            style={{
-              width: "220px",
-              flexShrink: 0,
-              fontSize: "11px",
-              fontWeight: "bold",
-              color: "#71717a",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-            }}
-          >
+        <div className="flex items-center mb-2.5">
+          <div className="w-[220px] shrink-0 text-[11px] font-bold text-zinc-500 flex items-center gap-1.5 font-mono">
             CHANNEL RACK{" "}
-            <span style={{ color: "#60a5fa", fontSize: "10px" }}>
+            <span className="text-blue-400 text-[10px]">
               ● 64 STEPS (4 BARS)
             </span>
           </div>
-          <div style={{ display: "flex", gap: "3px", flex: 1 }}>
+          <div className="flex gap-[3px] flex-1">
             {displayedStepIndices.map((globalStepIdx) => {
               const isCurrent = activeStep === globalStepIdx;
               const isBarStart = globalStepIdx % 16 === 0;
@@ -161,24 +140,19 @@ export const Sequencer: React.FC = () => {
               return (
                 <div
                   key={globalStepIdx}
-                  style={{
-                    flex: 1,
-                    height: "8px",
-                    borderRadius: "2px",
-                    background: isCurrent
-                      ? "#3b82f6"
+                  className={`flex-1 h-2 rounded-[2px] transition-all ${
+                    isCurrent
+                      ? "bg-blue-500 shadow-[0_0_8px_#3b82f6]"
                       : isBarStart
-                        ? "#52525b"
+                        ? "bg-zinc-600"
                         : isBeatStart
-                          ? "#3f3f46"
-                          : "#27272a",
-                    boxShadow: isCurrent ? "0 0 8px #3b82f6" : "none",
-                    transition: "background 0.04s, box-shadow 0.04s",
-                    borderLeft:
-                      isBarStart && globalStepIdx !== 0
-                        ? "2px solid #60a5fa"
-                        : "none",
-                  }}
+                          ? "bg-zinc-700"
+                          : "bg-zinc-800"
+                  } ${
+                    isBarStart && globalStepIdx !== 0
+                      ? "border-l-2 border-l-blue-400"
+                      : ""
+                  }`}
                   title={`Step ${globalStepIdx + 1} (Bar ${Math.floor(globalStepIdx / 16) + 1}, Beat ${Math.floor((globalStepIdx % 16) / 4) + 1})`}
                 />
               );
@@ -187,7 +161,7 @@ export const Sequencer: React.FC = () => {
         </div>
 
         {/* Tracks List */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        <div className="flex flex-col gap-1.5">
           {tracks.map((track, trackIdx) => {
             const isMelodic = track.type === "melodic";
             const currentDrawingPitch = activePitches[track.id] ?? 60;
@@ -195,45 +169,19 @@ export const Sequencer: React.FC = () => {
             return (
               <div
                 key={track.id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  background: "#18181b",
-                  padding: "4px 8px",
-                  borderRadius: "4px",
-                  border: "1px solid #27272a",
-                }}
+                className="flex items-center bg-zinc-900 px-2 py-1 rounded border border-zinc-800/80"
               >
-                {/* Track Controls (M/S, Name with Preview, Sample Dropdown, Pitch, Delete) */}
-                <div
-                  style={{
-                    width: "220px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "5px",
-                    flexShrink: 0,
-                  }}
-                >
-                  {/* FL Studio Green Glowing LED Mute/Activity Light */}
+                {/* Track Controls */}
+                <div className="w-[220px] flex items-center gap-1.5 shrink-0">
+                  {/* FL Studio Green Glowing LED Mute Light */}
                   <div
                     onClick={(e) => {
                       e.stopPropagation();
                       onToggleMute(trackIdx);
                     }}
-                    style={{
-                      width: "8px",
-                      height: "8px",
-                      borderRadius: "50%",
-                      background: track.isMuted ? "#27272a" : "#22c55e",
-                      boxShadow: track.isMuted
-                        ? "inset 0 1px 2px rgba(0, 0, 0, 0.8)"
-                        : "0 0 7px #22c55e, inset 0 1px 1px #86efac",
-                      border:
-                        "1px solid " + (track.isMuted ? "#18181b" : "#16a34a"),
-                      cursor: "pointer",
-                      flexShrink: 0,
-                      transition: "all 0.15s ease",
-                    }}
+                    className={`w-2 h-2 rounded-full cursor-pointer shrink-0 transition-all ${
+                      track.isMuted ? "led-mute-inactive" : "led-mute-active"
+                    }`}
                     title={
                       track.isMuted
                         ? "Unmute Track (Click LED)"
@@ -243,72 +191,45 @@ export const Sequencer: React.FC = () => {
 
                   <button
                     onClick={() => onToggleMute(trackIdx)}
-                    style={{
-                      background: track.isMuted ? "#ef4444" : "#27272a",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "3px",
-                      fontSize: "10px",
-                      padding: "3px 6px",
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                    }}
+                    className={`rounded text-[10px] px-1.5 py-0.5 cursor-pointer font-bold text-white transition-colors ${
+                      track.isMuted
+                        ? "bg-red-500"
+                        : "bg-zinc-800 hover:bg-zinc-700"
+                    }`}
                     title="Mute Track"
                   >
                     M
                   </button>
                   <button
                     onClick={() => onToggleSolo(trackIdx)}
-                    style={{
-                      background: track.isSoloed ? "#eab308" : "#27272a",
-                      color: track.isSoloed ? "#000" : "#fff",
-                      border: "none",
-                      borderRadius: "3px",
-                      fontSize: "10px",
-                      padding: "3px 6px",
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                    }}
+                    className={`rounded text-[10px] px-1.5 py-0.5 cursor-pointer font-bold transition-colors ${
+                      track.isSoloed
+                        ? "bg-yellow-500 text-black"
+                        : "bg-zinc-800 hover:bg-zinc-700 text-white"
+                    }`}
                     title="Solo Track"
                   >
                     S
                   </button>
 
-                  {/* Track Name: Click to Preview / Audition */}
+                  {/* Track Name */}
                   <span
                     onClick={() =>
                       onAuditionTrack(trackIdx, currentDrawingPitch)
                     }
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: isMelodic ? "#c084fc" : "#f4f4f5",
-                      cursor: "pointer",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      flex: 1,
-                    }}
+                    className={`text-xs font-bold cursor-pointer truncate flex-1 ${
+                      isMelodic ? "text-purple-400" : "text-zinc-100"
+                    }`}
                     title={`${track.name} (Click to preview sound)`}
                   >
                     {track.name}
                   </span>
 
-                  {/* Sample Swap Dropdown: In Sequencer Rack */}
+                  {/* Sample Swap Dropdown */}
                   <select
                     value={track.sampleId}
                     onChange={(e) => onSampleChange(trackIdx, e.target.value)}
-                    style={{
-                      background: "#27272a",
-                      color: "#d4d4d8",
-                      border: "1px solid #3f3f46",
-                      borderRadius: "3px",
-                      fontSize: "9px",
-                      padding: "2px 2px",
-                      cursor: "pointer",
-                      outline: "none",
-                      maxWidth: "75px",
-                    }}
+                    className="bg-zinc-800 text-zinc-300 border border-zinc-700 rounded text-[9px] p-0.5 cursor-pointer outline-none max-w-[75px]"
                     title="Change Sample"
                   >
                     {SAMPLE_CATALOG.map((s) => (
@@ -327,17 +248,7 @@ export const Sequencer: React.FC = () => {
                         onActivePitchChange(track.id, newPitch);
                         onAuditionTrack(trackIdx, newPitch);
                       }}
-                      style={{
-                        background: "#27272a",
-                        color: "#a78bfa",
-                        border: "1px solid #3f3f46",
-                        borderRadius: "3px",
-                        fontSize: "9px",
-                        padding: "2px 2px",
-                        fontWeight: "bold",
-                        cursor: "pointer",
-                        outline: "none",
-                      }}
+                      className="bg-zinc-800 text-purple-300 border border-zinc-700 rounded text-[9px] p-0.5 font-bold cursor-pointer outline-none"
                       title="Default note when adding new steps"
                     >
                       {NOTE_OPTIONS.map((n) => (
@@ -352,20 +263,7 @@ export const Sequencer: React.FC = () => {
                   {isMelodic && (
                     <button
                       onClick={() => openPianoRoll(track.id)}
-                      style={{
-                        background: "#7c3aed",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "3px",
-                        fontSize: "9px",
-                        fontWeight: "bold",
-                        padding: "2px 5px",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "2px",
-                        flexShrink: 0,
-                      }}
+                      className="bg-purple-600 hover:bg-purple-500 text-white rounded text-[9px] font-bold px-1.5 py-0.5 cursor-pointer flex items-center gap-0.5 shrink-0 transition-colors"
                       title={`Open Piano Roll for ${track.name}`}
                     >
                       🎹
@@ -376,14 +274,7 @@ export const Sequencer: React.FC = () => {
                   {tracks.length > 1 && (
                     <button
                       onClick={() => onDeleteTrack(trackIdx)}
-                      style={{
-                        background: "transparent",
-                        color: "#71717a",
-                        border: "none",
-                        fontSize: "12px",
-                        cursor: "pointer",
-                        padding: "2px 4px",
-                      }}
+                      className="bg-transparent text-zinc-500 hover:text-red-400 text-xs cursor-pointer p-0.5 transition-colors"
                       title="Remove Track"
                     >
                       ✕
@@ -392,7 +283,7 @@ export const Sequencer: React.FC = () => {
                 </div>
 
                 {/* Step Buttons Grid (Permanent 64 Steps) */}
-                <div style={{ display: "flex", gap: "3px", flex: 1 }}>
+                <div className="flex gap-[3px] flex-1">
                   {displayedStepIndices.map((globalStepIdx) => {
                     const isActive = track.steps[globalStepIdx];
                     const isBeatGroupA =
@@ -415,6 +306,25 @@ export const Sequencer: React.FC = () => {
                           : NOTE_NAMES[pitch] || "C4"
                         : null;
 
+                    const padClasses = [
+                      "step-pad-base flex-1 h-[26px] min-w-[12px] flex items-center justify-center text-[8px] font-bold font-mono cursor-pointer p-0 relative",
+                      isCurrent ? "step-pad-current" : "",
+                      isBarBoundary && !isCurrent
+                        ? "border-l-2 !border-l-blue-500"
+                        : "",
+                      isActive
+                        ? isMelodic
+                          ? isChord
+                            ? "step-pad-active-chord"
+                            : "step-pad-active-melodic"
+                          : "step-pad-active-drum"
+                        : isBeatGroupA
+                          ? "step-pad-group-a"
+                          : "step-pad-group-b",
+                    ]
+                      .filter(Boolean)
+                      .join(" ");
+
                     return (
                       <button
                         key={globalStepIdx}
@@ -429,54 +339,7 @@ export const Sequencer: React.FC = () => {
                             onRemoveStep(trackIdx, globalStepIdx);
                           }
                         }}
-                        style={{
-                          flex: 1,
-                          height: "26px",
-                          minWidth: "12px",
-                          borderRadius: "3px",
-                          border: isCurrent
-                            ? "1px solid #60a5fa"
-                            : "1px solid rgba(0, 0, 0, 0.45)",
-                          borderLeft: isBarBoundary
-                            ? "2px solid #3b82f6"
-                            : isCurrent
-                              ? "1px solid #60a5fa"
-                              : "1px solid rgba(0, 0, 0, 0.45)",
-                          background: isActive
-                            ? isMelodic
-                              ? isChord
-                                ? "linear-gradient(180deg, #f472b6 0%, #a855f7 100%)"
-                                : "linear-gradient(180deg, #c084fc 0%, #9333ea 100%)"
-                              : "linear-gradient(180deg, #ffffff 0%, #d4d4d8 100%)"
-                            : isBeatGroupA
-                              ? "#38383e"
-                              : "#242428",
-                          color: isActive
-                            ? isMelodic
-                              ? "#ffffff"
-                              : "#18181b"
-                            : "#71717a",
-                          fontSize: "8px",
-                          fontWeight: "bold",
-                          fontFamily: "monospace",
-                          cursor: "pointer",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          boxShadow: isActive
-                            ? isCurrent
-                              ? "0 0 10px #60a5fa, inset 0 1px 0 rgba(255, 255, 255, 0.5)"
-                              : isChord
-                                ? "0 0 6px rgba(244, 114, 182, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.4)"
-                                : "inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 3px rgba(0, 0, 0, 0.5)"
-                            : isBeatGroupA
-                              ? "inset 1px 1px 0 rgba(255, 255, 255, 0.12), inset -1px -1px 0 rgba(0, 0, 0, 0.4)"
-                              : "inset 1px 1px 0 rgba(255, 255, 255, 0.06), inset -1px -1px 0 rgba(0, 0, 0, 0.5)",
-                          transform: isCurrent ? "scale(1.05)" : "none",
-                          transition: "transform 0.04s, background 0.1s",
-                          padding: 0,
-                          position: "relative",
-                        }}
+                        className={padClasses}
                         title={
                           isActive
                             ? isMelodic
@@ -502,25 +365,13 @@ export const Sequencer: React.FC = () => {
 
           {/* Add Track Button (Capped at 10 Tracks) */}
           {tracks.length < 10 && (
-            <div style={{ marginTop: "8px", position: "relative" }}>
+            <div className="mt-2 relative">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowAddMenu((prev) => !prev);
                 }}
-                style={{
-                  background: "#18181b",
-                  color: "#60a5fa",
-                  border: "1px dashed #3f3f46",
-                  borderRadius: "4px",
-                  padding: "8px 16px",
-                  cursor: "pointer",
-                  fontSize: "12px",
-                  fontWeight: "bold",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                }}
+                className="bg-zinc-900 hover:bg-zinc-800 text-blue-400 border border-dashed border-zinc-700 rounded px-4 py-2 cursor-pointer text-xs font-bold flex items-center gap-1.5 transition-colors"
               >
                 + ADD TRACK ({tracks.length}/10)
               </button>
@@ -529,30 +380,9 @@ export const Sequencer: React.FC = () => {
               {showAddMenu && (
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  style={{
-                    position: "absolute",
-                    top: "100%",
-                    left: 0,
-                    marginTop: "6px",
-                    background: "#18181b",
-                    border: "1px solid #3b82f6",
-                    borderRadius: "6px",
-                    padding: "8px",
-                    zIndex: 2000,
-                    boxShadow: "0 8px 24px rgba(0,0,0,0.8)",
-                    maxHeight: "220px",
-                    overflowY: "auto",
-                    width: "250px",
-                  }}
+                  className="absolute top-full left-0 mt-1.5 bg-zinc-900 border border-blue-500 rounded-md p-2 z-50 shadow-2xl max-h-[220px] overflow-y-auto w-[250px]"
                 >
-                  <div
-                    style={{
-                      fontSize: "11px",
-                      color: "#93c5fd",
-                      fontWeight: "bold",
-                      marginBottom: "6px",
-                    }}
-                  >
+                  <div className="text-[11px] text-blue-300 font-bold mb-1.5 font-mono">
                     SELECT SAMPLE TO ADD:
                   </div>
                   {SAMPLE_CATALOG.map((s) => (
@@ -562,24 +392,10 @@ export const Sequencer: React.FC = () => {
                         onAddTrack(s.id);
                         setShowAddMenu(false);
                       }}
-                      style={{
-                        padding: "4px 6px",
-                        fontSize: "11px",
-                        color: "#e4e4e7",
-                        cursor: "pointer",
-                        borderRadius: "3px",
-                        display: "flex",
-                        justifyContent: "space-between",
-                      }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.background = "#27272a")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.background = "transparent")
-                      }
+                      className="px-1.5 py-1 text-[11px] text-zinc-200 hover:bg-zinc-800 cursor-pointer rounded flex justify-between transition-colors"
                     >
                       <span>{s.name}</span>
-                      <span style={{ color: "#71717a", fontSize: "10px" }}>
+                      <span className="text-zinc-500 text-[10px]">
                         {s.category}
                       </span>
                     </div>
@@ -595,8 +411,8 @@ export const Sequencer: React.FC = () => {
       {pitchPicker && (
         <div
           onClick={(e) => e.stopPropagation()}
+          className="fixed bg-zinc-900 border border-blue-500 rounded-md p-2.5 z-50 shadow-2xl flex flex-col gap-2 min-w-[200px] max-w-[240px]"
           style={{
-            position: "fixed",
             left: Math.max(
               10,
               Math.min(pitchPicker.x, window.innerWidth - 240),
@@ -605,35 +421,14 @@ export const Sequencer: React.FC = () => {
               pitchPicker.y + 260 > window.innerHeight
                 ? Math.max(10, pitchPicker.y - 270)
                 : pitchPicker.y,
-            background: "#18181b",
-            border: "1px solid #3b82f6",
-            borderRadius: "6px",
-            padding: "10px",
-            zIndex: 1000,
-            boxShadow: "0 10px 30px rgba(0,0,0,0.85)",
-            display: "flex",
-            flexDirection: "column",
-            gap: "8px",
-            minWidth: "200px",
-            maxWidth: "240px",
           }}
         >
           {/* Header */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              borderBottom: "1px solid #27272a",
-              paddingBottom: "6px",
-            }}
-          >
-            <span
-              style={{ fontSize: "11px", color: "#93c5fd", fontWeight: "bold" }}
-            >
+          <div className="flex justify-between items-center border-b border-zinc-800 pb-1.5">
+            <span className="text-[11px] text-blue-300 font-bold font-mono">
               STEP {pitchPicker.stepIndex + 1} NOTE:
             </span>
-            <div style={{ display: "flex", gap: "4px" }}>
+            <div className="flex gap-1">
               <button
                 onClick={() => {
                   const targetTrack = tracks[pitchPicker.trackIndex];
@@ -642,16 +437,7 @@ export const Sequencer: React.FC = () => {
                   }
                   setPitchPicker(null);
                 }}
-                style={{
-                  background: "#7c3aed",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "3px",
-                  fontSize: "10px",
-                  fontWeight: "bold",
-                  padding: "2px 6px",
-                  cursor: "pointer",
-                }}
+                className="bg-purple-600 hover:bg-purple-500 text-white rounded text-[10px] font-bold px-1.5 py-0.5 cursor-pointer transition-colors"
                 title="Open Piano Roll to compose chords"
               >
                 🎹 ROLLS
@@ -661,16 +447,7 @@ export const Sequencer: React.FC = () => {
                   onRemoveStep(pitchPicker.trackIndex, pitchPicker.stepIndex);
                   setPitchPicker(null);
                 }}
-                style={{
-                  background: "#ef4444",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "3px",
-                  fontSize: "10px",
-                  fontWeight: "bold",
-                  padding: "2px 6px",
-                  cursor: "pointer",
-                }}
+                className="bg-red-500 hover:bg-red-400 text-white rounded text-[10px] font-bold px-1.5 py-0.5 cursor-pointer transition-colors"
                 title="Remove this note trigger"
               >
                 ✕ DELETE
@@ -679,15 +456,7 @@ export const Sequencer: React.FC = () => {
           </div>
 
           {/* Grid of Note Buttons */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "4px",
-              maxHeight: "180px",
-              overflowY: "auto",
-            }}
-          >
+          <div className="grid grid-cols-3 gap-1 max-h-[180px] overflow-y-auto">
             {NOTE_OPTIONS.map((n) => {
               const currentPitch =
                 tracks[pitchPicker.trackIndex]?.pitches[pitchPicker.stepIndex];
@@ -709,20 +478,11 @@ export const Sequencer: React.FC = () => {
                     onAuditionTrack(pitchPicker.trackIndex, n.midi);
                     setPitchPicker(null);
                   }}
-                  style={{
-                    background: isSelected ? "#3b82f6" : "#27272a",
-                    color: isSelected ? "#fff" : "#e4e4e7",
-                    border: isSelected
-                      ? "1px solid #60a5fa"
-                      : "1px solid transparent",
-                    borderRadius: "3px",
-                    padding: "6px 2px",
-                    fontSize: "11px",
-                    fontWeight: isSelected ? "bold" : "normal",
-                    cursor: "pointer",
-                    textAlign: "center",
-                    transition: "background 0.1s",
-                  }}
+                  className={`rounded py-1.5 px-0.5 text-[11px] text-center cursor-pointer transition-colors ${
+                    isSelected
+                      ? "bg-blue-600 text-white font-bold border border-blue-400"
+                      : "bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-transparent font-normal"
+                  }`}
                   title={`Play & set to ${n.label}`}
                 >
                   {n.label}
@@ -731,9 +491,7 @@ export const Sequencer: React.FC = () => {
             })}
           </div>
 
-          <div
-            style={{ fontSize: "10px", color: "#71717a", textAlign: "center" }}
-          >
+          <div className="text-[10px] text-zinc-500 text-center font-mono">
             Click note to audition & set • Click Delete to remove
           </div>
         </div>
@@ -741,3 +499,4 @@ export const Sequencer: React.FC = () => {
     </div>
   );
 };
+export default Sequencer;

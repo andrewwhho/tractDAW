@@ -8,97 +8,32 @@ export const Mixer: React.FC = () => {
   const onTrackVolumeChange = useDawStore((state) => state.setTrackVolume);
   const onToggleMute = useDawStore((state) => state.toggleMute);
   const onToggleSolo = useDawStore((state) => state.toggleSolo);
+
   return (
-    <div
-      style={{
-        background: "#121215",
-        border: "1px solid #27272a",
-        borderRadius: "6px",
-        padding: "16px",
-        overflowX: "auto",
-        width: "100%",
-        boxSizing: "border-box",
-      }}
-    >
+    <div className="bg-zinc-950/90 border border-zinc-800 rounded-md p-4 overflow-x-auto w-full box-border">
       {/* Mixer Console Header */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "16px",
-          borderBottom: "1px solid #27272a",
-          paddingBottom: "8px",
-        }}
-      >
-        <span
-          style={{ fontSize: "13px", fontWeight: "bold", color: "#e4e4e7" }}
-        >
+      <div className="flex justify-between items-center mb-4 border-b border-zinc-800 pb-2">
+        <span className="text-[13px] font-bold text-zinc-200">
           🎛️ TRACK MIXER CONSOLE
         </span>
-        <span style={{ fontSize: "11px", color: "#71717a" }}>
+        <span className="text-[11px] text-zinc-500 font-mono">
           Volume Faders • Solo • Mute
         </span>
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          gap: "6px",
-          alignItems: "stretch",
-          minHeight: "210px",
-        }}
-      >
+      <div className="flex gap-1.5 items-stretch min-h-[210px]">
         {/* Master Bus Channel Strip (Far Left) */}
-        <div
-          style={{
-            width: "84px",
-            background: "#18181b",
-            border: "2px solid #3b82f6",
-            borderRadius: "6px",
-            padding: "8px 6px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexShrink: 0,
-          }}
-        >
+        <div className="w-[84px] bg-zinc-900 border-2 border-blue-500 rounded-md p-2 px-1.5 flex flex-col items-center justify-between shrink-0">
           {/* Channel Label */}
-          <div style={{ textAlign: "center", width: "100%" }}>
-            <div
-              style={{
-                fontSize: "11px",
-                fontWeight: "bold",
-                color: "#60a5fa",
-                letterSpacing: "0.5px",
-              }}
-            >
+          <div className="text-center w-full">
+            <div className="text-[11px] font-bold text-blue-400 tracking-wider">
               MASTER
             </div>
-            <div
-              style={{
-                fontSize: "9px",
-                color: "#71717a",
-                marginTop: "2px",
-              }}
-            >
-              MAIN BUS
-            </div>
+            <div className="text-[9px] text-zinc-500 mt-0.5">MAIN BUS</div>
           </div>
 
           {/* Master Volume Fader */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "6px",
-              margin: "8px 0",
-              height: "110px",
-              justifyContent: "center",
-            }}
-          >
+          <div className="flex flex-col items-center gap-1.5 my-2 h-[110px] justify-center">
             <input
               type="range"
               min="0"
@@ -106,56 +41,24 @@ export const Mixer: React.FC = () => {
               step="0.01"
               value={masterVolume}
               onChange={(e) => onMasterVolumeChange(parseFloat(e.target.value))}
-              style={{
-                writingMode: "vertical-lr",
-                direction: "rtl",
-                width: "24px",
-                height: "90px",
-                accentColor: "#3b82f6",
-                cursor: "pointer",
-              }}
+              className="vertical-fader w-6 h-[90px] accent-blue-500 cursor-pointer"
               title="Master Volume Fader"
             />
-            <span
-              style={{
-                fontSize: "10px",
-                fontWeight: "bold",
-                color: "#93c5fd",
-                fontFamily: "monospace",
-              }}
-            >
+            <span className="text-[10px] font-bold text-blue-300 font-mono">
               {Math.round(masterVolume * 100)}%
             </span>
           </div>
 
-          <div
-            style={{ fontSize: "9px", color: "#52525b", fontWeight: "bold" }}
-          >
-            OUTPUT
-          </div>
+          <div className="text-[9px] text-zinc-500 font-bold">OUTPUT</div>
         </div>
 
         {/* Slim dB Scale Ruler */}
         <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            alignItems: "center",
-            height: "90px",
-            fontSize: "8px",
-            color: "#52525b",
-            fontFamily: "monospace",
-            fontWeight: "bold",
-            alignSelf: "center",
-            userSelect: "none",
-            padding: "0 2px",
-            flexShrink: 0,
-          }}
+          className="flex flex-col justify-between items-center h-[90px] text-[8px] text-zinc-500 font-mono font-bold self-center select-none px-0.5 shrink-0"
           title="Fader dB Scale"
         >
-          <span style={{ color: "#ef4444" }}>+3</span>
-          <span style={{ color: "#60a5fa" }}>0dB</span>
+          <span className="text-red-500">+3</span>
+          <span className="text-blue-400">0dB</span>
           <span>-3</span>
           <span>-6</span>
           <span>-12</span>
@@ -165,13 +68,7 @@ export const Mixer: React.FC = () => {
         </div>
 
         {/* Vertical Divider */}
-        <div
-          style={{
-            width: "1px",
-            background: "#27272a",
-            margin: "0 2px",
-          }}
-        />
+        <div className="w-[1px] bg-zinc-800 mx-0.5" />
 
         {/* Track Channel Strips (Insert 1 to 10) */}
         {tracks.map((track, idx) => {
@@ -180,40 +77,18 @@ export const Mixer: React.FC = () => {
           return (
             <div
               key={track.id}
-              style={{
-                width: "82px",
-                background: "#18181b",
-                border: "1px solid #27272a",
-                borderRadius: "6px",
-                padding: "8px 4px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "space-between",
-                flexShrink: 0,
-                opacity: track.isMuted ? 0.5 : 1,
-                transition: "opacity 0.15s",
-              }}
+              className={`w-[82px] bg-zinc-900 border border-zinc-800 rounded-md p-2 px-1 flex flex-col items-center justify-between shrink-0 transition-opacity ${
+                track.isMuted ? "opacity-50" : "opacity-100"
+              }`}
             >
               {/* Channel Label */}
-              <div style={{ textAlign: "center", width: "100%" }}>
+              <div className="text-center w-full">
                 {/* FL Studio Green Glowing LED Mute Light */}
                 <div
                   onClick={() => onToggleMute(idx)}
-                  style={{
-                    width: "8px",
-                    height: "8px",
-                    borderRadius: "50%",
-                    background: track.isMuted ? "#27272a" : "#22c55e",
-                    boxShadow: track.isMuted
-                      ? "inset 0 1px 2px rgba(0, 0, 0, 0.8)"
-                      : "0 0 6px #22c55e, inset 0 1px 1px #86efac",
-                    border:
-                      "1px solid " + (track.isMuted ? "#18181b" : "#16a34a"),
-                    cursor: "pointer",
-                    margin: "0 auto 4px auto",
-                    transition: "all 0.15s ease",
-                  }}
+                  className={`w-2 h-2 rounded-full cursor-pointer mx-auto mb-1 transition-all ${
+                    track.isMuted ? "led-mute-inactive" : "led-mute-active"
+                  }`}
                   title={
                     track.isMuted
                       ? "Unmute Track (Click LED)"
@@ -221,26 +96,13 @@ export const Mixer: React.FC = () => {
                   }
                 />
 
-                <div
-                  style={{
-                    fontSize: "9px",
-                    color: "#38bdf8",
-                    fontWeight: "bold",
-                    letterSpacing: "0.5px",
-                  }}
-                >
+                <div className="text-[9px] text-sky-400 font-bold tracking-wider">
                   INSERT {idx + 1}
                 </div>
                 <div
-                  style={{
-                    fontSize: "11px",
-                    fontWeight: "bold",
-                    color: isMelodic ? "#c084fc" : "#f4f4f5",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                    marginTop: "2px",
-                  }}
+                  className={`text-[11px] font-bold truncate mt-0.5 ${
+                    isMelodic ? "text-purple-400" : "text-zinc-100"
+                  }`}
                   title={track.name}
                 >
                   {track.name}
@@ -248,17 +110,7 @@ export const Mixer: React.FC = () => {
               </div>
 
               {/* Vertical Volume Fader */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "6px",
-                  margin: "6px 0",
-                  height: "105px",
-                  justifyContent: "center",
-                }}
-              >
+              <div className="flex flex-col items-center gap-1.5 my-1.5 h-[105px] justify-center">
                 <input
                   type="range"
                   min="0"
@@ -268,69 +120,36 @@ export const Mixer: React.FC = () => {
                   onChange={(e) =>
                     onTrackVolumeChange(idx, parseFloat(e.target.value))
                   }
-                  style={{
-                    writingMode: "vertical-lr",
-                    direction: "rtl",
-                    width: "20px",
-                    height: "85px",
-                    accentColor: isMelodic ? "#8b5cf6" : "#22c55e",
-                    cursor: "pointer",
-                  }}
+                  className={`vertical-fader w-5 h-[85px] cursor-pointer ${
+                    isMelodic ? "accent-purple-500" : "accent-emerald-500"
+                  }`}
                   title={`${track.name} Volume Fader`}
                 />
-                <span
-                  style={{
-                    fontSize: "10px",
-                    fontWeight: "bold",
-                    color: "#a1a1aa",
-                    fontFamily: "monospace",
-                  }}
-                >
+                <span className="text-[10px] font-bold text-zinc-400 font-mono">
                   {Math.round(track.volume * 100)}%
                 </span>
               </div>
 
               {/* Mute & Solo Buttons */}
-              <div
-                style={{
-                  display: "flex",
-                  gap: "4px",
-                  width: "100%",
-                  justifyContent: "center",
-                }}
-              >
+              <div className="flex gap-1 w-full justify-center">
                 <button
                   onClick={() => onToggleMute(idx)}
-                  style={{
-                    flex: 1,
-                    background: track.isMuted ? "#ef4444" : "#27272a",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "3px",
-                    fontSize: "10px",
-                    fontWeight: "bold",
-                    padding: "4px 0",
-                    cursor: "pointer",
-                    transition: "background 0.15s",
-                  }}
+                  className={`flex-1 text-[10px] font-bold py-1 rounded cursor-pointer transition-colors ${
+                    track.isMuted
+                      ? "bg-red-500 text-white"
+                      : "bg-zinc-800 hover:bg-zinc-700 text-white"
+                  }`}
                   title="Mute Track"
                 >
                   M
                 </button>
                 <button
                   onClick={() => onToggleSolo(idx)}
-                  style={{
-                    flex: 1,
-                    background: track.isSoloed ? "#eab308" : "#27272a",
-                    color: track.isSoloed ? "#000" : "#fff",
-                    border: "none",
-                    borderRadius: "3px",
-                    fontSize: "10px",
-                    fontWeight: "bold",
-                    padding: "4px 0",
-                    cursor: "pointer",
-                    transition: "background 0.15s",
-                  }}
+                  className={`flex-1 text-[10px] font-bold py-1 rounded cursor-pointer transition-colors ${
+                    track.isSoloed
+                      ? "bg-yellow-500 text-black"
+                      : "bg-zinc-800 hover:bg-zinc-700 text-white"
+                  }`}
                   title="Solo Track"
                 >
                   S
@@ -343,3 +162,4 @@ export const Mixer: React.FC = () => {
     </div>
   );
 };
+export default Mixer;

@@ -113,122 +113,42 @@ export const App: React.FC = () => {
 
   // DAW Main Content JSX
   const dawContent = (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "12px",
-        width: "100%",
-        boxSizing: "border-box",
-      }}
-    >
+    <div className="flex flex-col gap-3 w-full box-border">
       {/* Transport Bar & View Switcher (Clean Two-Tier Layout) */}
-      <section
-        style={{
-          background: "#18181b",
-          border: "1px solid #27272a",
-          borderRadius: "6px",
-          padding: "10px 14px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "10px",
-        }}
-      >
+      <section className="bg-zinc-900 border border-zinc-800 rounded-md p-2.5 sm:px-3.5 flex flex-col gap-2.5">
         {/* Tier 1: Audio Playback & Clock */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: "10px",
-          }}
-        >
+        <div className="flex items-center justify-between flex-wrap gap-2.5">
           {/* Left: Play/Stop & BPM */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div className="flex items-center gap-2.5">
             <button
               onClick={togglePlay}
               disabled={!isReady}
-              style={{
-                padding: "7px 18px",
-                background: isPlaying ? "#ef4444" : "#2563eb",
-                color: "#fff",
-                border: "none",
-                borderRadius: "4px",
-                cursor: isReady ? "pointer" : "not-allowed",
-                fontWeight: "bold",
-                fontSize: "12px",
-                minWidth: "85px",
-                letterSpacing: "0.5px",
-                boxShadow: isPlaying
-                  ? "0 0 10px rgba(239, 68, 68, 0.4)"
-                  : "none",
-                transition: "all 0.15s ease",
-              }}
+              className={`px-4 py-1.5 rounded text-white font-bold text-xs min-w-[85px] tracking-wide transition-all ${
+                isReady ? "cursor-pointer" : "cursor-not-allowed opacity-50"
+              } ${
+                isPlaying
+                  ? "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]"
+                  : "bg-blue-600 hover:bg-blue-500"
+              }`}
             >
               {isPlaying ? "■ STOP" : "▶ PLAY"}
             </button>
 
             {/* BPM Stepper */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                background: "#09090b",
-                padding: "2px 6px",
-                borderRadius: "4px",
-                border: "1px solid #3f3f46",
-                gap: "4px",
-              }}
-            >
-              <span
-                style={{
-                  color: "#71717a",
-                  fontSize: "10px",
-                  fontWeight: "bold",
-                }}
-              >
-                BPM:
-              </span>
+            <div className="flex items-center bg-zinc-950 px-1.5 py-0.5 rounded border border-zinc-700 gap-1">
+              <span className="text-zinc-500 text-[10px] font-bold">BPM:</span>
               <button
                 onClick={() => setBpm(bpm - 5)}
-                style={{
-                  background: "#27272a",
-                  color: "#e4e4e7",
-                  border: "none",
-                  borderRadius: "3px",
-                  padding: "2px 6px",
-                  cursor: "pointer",
-                  fontSize: "10px",
-                  fontWeight: "bold",
-                }}
+                className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded px-1.5 py-0.5 text-[10px] font-bold cursor-pointer transition-colors"
               >
                 -5
               </button>
-              <span
-                style={{
-                  fontSize: "13px",
-                  fontWeight: "bold",
-                  minWidth: "36px",
-                  textAlign: "center",
-                  color: "#f4f4f5",
-                  fontFamily: "monospace",
-                }}
-              >
+              <span className="text-[13px] font-bold min-w-[36px] text-center text-zinc-100 font-mono">
                 {bpm}
               </span>
               <button
                 onClick={() => setBpm(bpm + 5)}
-                style={{
-                  background: "#27272a",
-                  color: "#e4e4e7",
-                  border: "none",
-                  borderRadius: "3px",
-                  padding: "2px 6px",
-                  cursor: "pointer",
-                  fontSize: "10px",
-                  fontWeight: "bold",
-                }}
+                className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded px-1.5 py-0.5 text-[10px] font-bold cursor-pointer transition-colors"
               >
                 +5
               </button>
@@ -236,39 +156,25 @@ export const App: React.FC = () => {
           </div>
 
           {/* Center: LCD Position Display */}
-          <div
-            style={{
-              background: "#09090b",
-              padding: "5px 12px",
-              borderRadius: "4px",
-              border: "1px solid #3f3f46",
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              fontFamily: "monospace",
-            }}
-          >
+          <div className="bg-zinc-950 px-3 py-1 rounded border border-zinc-700 flex items-center gap-2.5 font-mono">
             <div>
-              <span style={{ color: "#71717a", fontSize: "10px" }}>POS:</span>{" "}
+              <span className="text-zinc-500 text-[10px]">POS:</span>{" "}
               <span
-                style={{
-                  color: isPlaying ? "#60a5fa" : "#a1a1aa",
-                  fontWeight: "bold",
-                  fontSize: "12px",
-                }}
+                className={`font-bold text-xs ${
+                  isPlaying ? "text-blue-400" : "text-zinc-400"
+                }`}
               >
                 BAR {activeBarIndex >= 0 ? activeBarIndex + 1 : 1} : BEAT{" "}
                 {activeBeat} : 16TH {active16th}
               </span>
             </div>
-            <span style={{ color: "#3f3f46" }}>|</span>
-            <div style={{ color: "#a1a1aa", fontSize: "11px" }}>
+            <span className="text-zinc-700">|</span>
+            <div className="text-zinc-400 text-[11px]">
               STEP:{" "}
               <span
-                style={{
-                  color: isPlaying ? "#22c55e" : "#e4e4e7",
-                  fontWeight: "bold",
-                }}
+                className={`font-bold ${
+                  isPlaying ? "text-emerald-400" : "text-zinc-200"
+                }`}
               >
                 {activeStep >= 0 ? activeStep + 1 : 0}
               </span>{" "}
@@ -277,15 +183,9 @@ export const App: React.FC = () => {
           </div>
 
           {/* Right: Master Volume & Status */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <span
-                style={{
-                  color: "#a1a1aa",
-                  fontSize: "10px",
-                  fontWeight: "bold",
-                }}
-              >
+          <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-1.5">
+              <span className="text-zinc-400 text-[10px] font-bold">
                 MASTER:
               </span>
               <input
@@ -295,41 +195,25 @@ export const App: React.FC = () => {
                 step="0.01"
                 value={masterVolume}
                 onChange={(e) => setMasterVolume(parseFloat(e.target.value))}
-                style={{
-                  width: "70px",
-                  accentColor: "#2563eb",
-                  cursor: "pointer",
-                }}
+                className="w-[70px] accent-blue-600 cursor-pointer"
               />
-              <span
-                style={{
-                  fontSize: "11px",
-                  color: "#93c5fd",
-                  minWidth: "30px",
-                  fontFamily: "monospace",
-                }}
-              >
+              <span className="text-[11px] text-blue-300 min-w-[30px] font-mono">
                 {Math.round(masterVolume * 100)}%
               </span>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+            <div className="flex items-center gap-1.5">
               <span
-                style={{
-                  display: "inline-block",
-                  width: "7px",
-                  height: "7px",
-                  borderRadius: "50%",
-                  background: isReady ? "#22c55e" : "#eab308",
-                  boxShadow: isReady ? "0 0 6px #22c55e" : "none",
-                }}
+                className={`inline-block w-2 h-2 rounded-full ${
+                  isReady
+                    ? "bg-emerald-500 shadow-[0_0_6px_#22c55e]"
+                    : "bg-yellow-500"
+                }`}
               />
               <span
-                style={{
-                  fontSize: "10px",
-                  fontWeight: "bold",
-                  color: isReady ? "#22c55e" : "#eab308",
-                }}
+                className={`text-[10px] font-bold ${
+                  isReady ? "text-emerald-400" : "text-yellow-400"
+                }`}
               >
                 {isReady ? "ONLINE" : "LOADING"}
               </span>
@@ -338,104 +222,42 @@ export const App: React.FC = () => {
         </div>
 
         {/* Tier 2: Studio Layout & Project Actions */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: "8px",
-            borderTop: "1px solid #27272a",
-            paddingTop: "8px",
-          }}
-        >
+        <div className="flex items-center justify-between flex-wrap gap-2 border-t border-zinc-800 pt-2">
           {/* Studio Layout Indicator & Track Capacity */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <span
-              style={{
-                fontSize: "11px",
-                fontWeight: "bold",
-                color: "#60a5fa",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                letterSpacing: "0.5px",
-              }}
-            >
+          <div className="flex items-center gap-2.5">
+            <span className="text-[11px] font-bold text-blue-400 flex items-center gap-1.5 tracking-wide">
               🪟 SPLIT VIEW{" "}
-              <span
-                style={{
-                  color: "#71717a",
-                  fontWeight: "normal",
-                  fontSize: "10px",
-                }}
-              >
+              <span className="text-zinc-500 font-normal text-[10px]">
                 (Channel Rack + Mixer Console)
               </span>
             </span>
 
             {/* Track Limit Pill */}
             <span
-              style={{
-                background:
-                  tracks.length >= 10
-                    ? "#450a0a"
-                    : tracks.length >= 8
-                      ? "#422006"
-                      : "#09090b",
-                color:
-                  tracks.length >= 10
-                    ? "#f87171"
-                    : tracks.length >= 8
-                      ? "#facc15"
-                      : "#94a3b8",
-                border:
-                  tracks.length >= 10
-                    ? "1px solid #7f1d1d"
-                    : tracks.length >= 8
-                      ? "1px solid #713f12"
-                      : "1px solid #27272a",
-                borderRadius: "4px",
-                padding: "3px 8px",
-                fontSize: "10px",
-                fontWeight: "bold",
-                fontFamily: "monospace",
-              }}
+              className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono border ${
+                tracks.length >= 10
+                  ? "bg-red-950 text-red-400 border-red-900"
+                  : tracks.length >= 8
+                    ? "bg-amber-950 text-yellow-400 border-yellow-900"
+                    : "bg-zinc-950 text-slate-400 border-zinc-800"
+              }`}
             >
               {tracks.length} / 10 TRACKS
             </span>
           </div>
 
           {/* Quick Actions & Window Mode */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div className="flex items-center gap-2">
             <button
               onClick={clearAll}
-              style={{
-                background: "#27272a",
-                color: "#f87171",
-                border: "1px solid #3f3f46",
-                borderRadius: "4px",
-                padding: "4px 8px",
-                cursor: "pointer",
-                fontSize: "10px",
-                fontWeight: "bold",
-              }}
+              className="bg-zinc-800 hover:bg-zinc-700 text-red-400 border border-zinc-700 rounded px-2 py-1 text-[10px] font-bold cursor-pointer transition-colors"
               title="Clear all note triggers"
             >
               🗑 CLEAR
             </button>
             <button
               onClick={reloadDemo}
-              style={{
-                background: "#27272a",
-                color: "#93c5fd",
-                border: "1px solid #3f3f46",
-                borderRadius: "4px",
-                padding: "4px 8px",
-                cursor: "pointer",
-                fontSize: "10px",
-                fontWeight: "bold",
-              }}
+              className="bg-zinc-800 hover:bg-zinc-700 text-blue-300 border border-zinc-700 rounded px-2 py-1 text-[10px] font-bold cursor-pointer transition-colors"
               title="Reload initial 4-bar groove"
             >
               ↺ RELOAD
@@ -448,20 +270,11 @@ export const App: React.FC = () => {
                   containerMode === "fullscreen" ? "windowpane" : "fullscreen",
                 )
               }
-              style={{
-                background:
-                  containerMode === "windowpane" ? "#1e3a8a" : "#27272a",
-                color: containerMode === "windowpane" ? "#93c5fd" : "#a1a1aa",
-                border:
-                  containerMode === "windowpane"
-                    ? "1px solid #3b82f6"
-                    : "1px solid #3f3f46",
-                borderRadius: "4px",
-                padding: "4px 8px",
-                cursor: "pointer",
-                fontSize: "10px",
-                fontWeight: "bold",
-              }}
+              className={`px-2 py-1 rounded text-[10px] font-bold border cursor-pointer transition-colors ${
+                containerMode === "windowpane"
+                  ? "bg-blue-900 text-blue-300 border-blue-500"
+                  : "bg-zinc-800 hover:bg-zinc-700 text-zinc-400 border-zinc-700"
+              }`}
               title="Toggle between Fullscreen and Portfolio WindowPane simulation (1280x720)"
             >
               {containerMode === "windowpane"
@@ -473,36 +286,18 @@ export const App: React.FC = () => {
       </section>
 
       {/* Main Workspace: Channel Rack (Top) + Mixer Console (Bottom) */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px",
-          width: "100%",
-        }}
-      >
+      <div className="flex flex-col gap-3 w-full">
         <Sequencer />
         <Mixer />
         <PianoRoll />
       </div>
 
       {/* Compact Status / Tips Footer */}
-      <footer
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          color: "#71717a",
-          fontSize: "10px",
-          padding: "6px 4px",
-          borderTop: "1px solid #1f1f23",
-          marginTop: "4px",
-          fontFamily: "monospace",
-        }}
-      >
+      <footer className="flex justify-between items-center text-zinc-500 text-[10px] py-1.5 px-1 border-t border-zinc-900 mt-1 font-mono">
         <div>
-          💡 <strong>Tips:</strong> Space: Play/Stop • Home/0: Rewind • Esc:
-          Dismiss Note • Click track name to audition sound • Max 10 Tracks
+          💡 <strong className="text-zinc-400">Tips:</strong> Space: Play/Stop •
+          Home/0: Rewind • Esc: Dismiss Note • Click track name to audition
+          sound • Max 10 Tracks
         </div>
         <div>tractDAW • Max 10 Tracks • 64 Steps</div>
       </footer>
@@ -512,94 +307,29 @@ export const App: React.FC = () => {
   // Top-Level Container Rendering
   if (containerMode === "windowpane") {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "#09090b",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "flex-start",
-          padding: "24px 16px",
-          boxSizing: "border-box",
-          fontFamily: "Consolas, monospace",
-          color: "#f4f4f5",
-          userSelect: "none",
-        }}
-      >
+      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-start p-4 sm:p-6 box-border font-mono text-zinc-100 select-none">
         {/* WindowPane Frame Simulation */}
-        <div
-          style={{
-            width: "1280px",
-            maxWidth: "96vw",
-            height: "720px",
-            maxHeight: "92vh",
-            background: "rgba(18, 18, 22, 0.96)",
-            border: "1px solid rgba(255, 255, 255, 0.14)",
-            borderRadius: "6px",
-            boxShadow: "0 24px 64px rgba(0, 0, 0, 0.85)",
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-            backdropFilter: "blur(20px)",
-          }}
-        >
+        <div className="w-[1280px] max-w-[96vw] h-[720px] max-h-[92vh] bg-zinc-900/95 border border-white/15 rounded-md shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl">
           {/* WindowPane Header */}
-          <div
-            style={{
-              height: "36px",
-              background: "rgba(24, 24, 28, 0.95)",
-              borderBottom: "1px solid #27272a",
-              padding: "0 14px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              flexShrink: 0,
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span
-                style={{
-                  fontWeight: "bold",
-                  fontSize: "13px",
-                  color: "#f4f4f5",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                tractDAW<span style={{ color: "#3b82f6" }}>.</span>
+          <div className="h-9 bg-zinc-900/90 border-b border-zinc-800 px-3.5 flex justify-between items-center shrink-0">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-[13px] text-zinc-100 tracking-wide">
+                tractDAW<span className="text-blue-500">.</span>
               </span>
-              <span style={{ color: "#71717a", fontSize: "11px" }}>
-                (mini web DAW)
-              </span>
+              <span className="text-zinc-500 text-[11px]">(mini web DAW)</span>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div className="flex items-center gap-2.5">
               <button
                 onClick={() => setContainerMode("fullscreen")}
-                style={{
-                  background: "transparent",
-                  border: "1px solid #3f3f46",
-                  color: "#a1a1aa",
-                  borderRadius: "3px",
-                  fontSize: "10px",
-                  padding: "2px 6px",
-                  cursor: "pointer",
-                }}
+                className="bg-transparent border border-zinc-700 text-zinc-400 hover:text-zinc-200 rounded px-1.5 py-0.5 text-[10px] cursor-pointer transition-colors"
                 title="Switch to full width view"
               >
                 EXPAND ↗
               </button>
               <button
                 onClick={() => setContainerMode("fullscreen")}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "rgba(255, 255, 255, 0.6)",
-                  fontSize: "18px",
-                  lineHeight: "1",
-                  cursor: "pointer",
-                  padding: "0 4px",
-                }}
+                className="bg-transparent border-none text-white/60 hover:text-white text-lg leading-none cursor-pointer px-1"
                 title="Close Window simulation"
               >
                 &times;
@@ -608,16 +338,7 @@ export const App: React.FC = () => {
           </div>
 
           {/* WindowPane Body */}
-          <div
-            style={{
-              flex: 1,
-              overflowY: "auto",
-              overflowX: "hidden",
-              padding: "14px",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
+          <div className="flex-1 overflow-y-auto overflow-x-hidden p-3.5 flex flex-col">
             {dawContent}
           </div>
         </div>
@@ -627,91 +348,27 @@ export const App: React.FC = () => {
 
   // Fullscreen Container Mode
   return (
-    <main
-      style={{
-        padding: "10px 14px",
-        background: "#09090b",
-        color: "#f4f4f5",
-        fontFamily: "Consolas, monospace",
-        minHeight: "100vh",
-        width: "100%",
-        boxSizing: "border-box",
-        userSelect: "none",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          display: "flex",
-          flexDirection: "column",
-          gap: "10px",
-          boxSizing: "border-box",
-        }}
-      >
+    <main className="p-2.5 sm:p-3.5 bg-zinc-950 text-zinc-100 font-mono min-h-screen w-full box-border select-none flex flex-col">
+      <div className="w-full flex flex-col gap-2.5 box-border">
         {/* Top Header */}
-        <header
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            borderBottom: "1px solid #27272a",
-            paddingBottom: "10px",
-          }}
-        >
+        <header className="flex justify-between items-center border-b border-zinc-800 pb-2.5">
           <div>
-            <h1
-              style={{
-                margin: 0,
-                fontSize: "17px",
-                letterSpacing: "1px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}
-            >
+            <h1 className="m-0 text-[17px] tracking-wider flex items-center gap-2 font-bold">
               tractDAW{" "}
-              <span
-                style={{
-                  color: "#3b82f6",
-                  fontSize: "11px",
-                  background: "#1e3a8a",
-                  padding: "1px 6px",
-                  borderRadius: "3px",
-                }}
-              >
-                PHASE 4
+              <span className="text-blue-400 text-[11px] bg-blue-950/80 border border-blue-800 px-1.5 py-0.5 rounded">
+                STUDIO
               </span>
             </h1>
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#71717a",
-                marginTop: "3px",
-              }}
-            >
+            <div className="text-[11px] text-zinc-500 mt-0.5">
               64-Step Channel Rack • Track Mixer Console • Decoupled State
               Engine
             </div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div className="flex items-center gap-3">
             <button
               onClick={() => setContainerMode("windowpane")}
-              style={{
-                background: "#18181b",
-                border: "1px solid #3b82f6",
-                color: "#93c5fd",
-                borderRadius: "4px",
-                padding: "5px 10px",
-                cursor: "pointer",
-                fontSize: "11px",
-                fontWeight: "bold",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-              }}
+              className="bg-zinc-900 hover:bg-zinc-800 border border-blue-500 text-blue-300 rounded px-2.5 py-1 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
               title="Preview inside portfolio WindowPane (1280x720)"
             >
               🪟 PREVIEW IN WINDOWPANE (1280×720)

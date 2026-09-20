@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   tractDAW Centralized Stylesheet: Global Resets, Hardware Controls & 3D Bevels
+   ========================================================================== */
+
+/* 1. Global Reset & Dark Theme Base */
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  background-color: #09090b;
+  color: #f4f4f5;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 2. Sleek Studio Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #121215;
+}
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+/* 3. FL Studio Glowing Green Status LED */
+.led-mute-active {
+  background: #22c55e;
+  box-shadow: 0 0 7px #22c55e, inset 0 1px 1px #86efac;
+  border: 1px solid #16a34a;
+}
+.led-mute-inactive {
+  background: #27272a;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+  border: 1px solid #18181b;
+}
+
+/* 4. FL Studio 3D Beveled Step Pads */
+.step-pad-base {
+  box-sizing: border-box;
+  user-select: none;
+  border-radius: 3px;
+  transition: transform 0.04s, background 0.1s;
+}
+
+/* Inactive 4-Beat Grouping Shading */
+.step-pad-group-a {
+  background-color: #38383e;
+  border: 1px solid rgba(0, 0, 0, 0.45);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.12), inset -1px -1px 0 rgba(0, 0, 0, 0.4);
+}
+.step-pad-group-b {
+  background-color: #242428;
+  border: 1px solid rgba(0, 0, 0, 0.45);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.06), inset -1px -1px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* Active Triggers */
+.step-pad-active-drum {
+  background: linear-gradient(180deg, #ffffff 0%, #d4d4d8 100%);
+  color: #18181b;
+  border: 1px solid rgba(0, 0, 0, 0.45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+.step-pad-active-melodic {
+  background: linear-gradient(180deg, #c084fc 0%, #9333ea 100%);
+  color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+.step-pad-active-chord {
+  background: linear-gradient(180deg, #f472b6 0%, #a855f7 100%);
+  color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.45);
+  box-shadow: 0 0 6px rgba(244, 114, 182, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* Playhead Scanning Highlight */
+.step-pad-current {
+  transform: scale(1.05);
+  border: 1px solid #60a5fa !important;
+  box-shadow: 0 0 10px #60a5fa, inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+}
+
+/* 5. Mixer Vertical Volume Faders */
+input[type="range"].vertical-fader {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  cursor: pointer;
+}
+
+/* 6. Piano Roll 3D Keyboard Styling */
+.piano-key-3d-black {
+  width: 44px;
+  height: 18px;
+  margin: 1px 0;
+  background: linear-gradient(90deg, #18181c 0%, #26262e 70%, #353540 100%);
+  border-radius: 0 3px 3px 0;
+  border-right: 1px solid #101014;
+  border-top: 1px solid #3f3f46;
+  border-bottom: 1px solid #09090b;
+  box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  z-index: 2;
+  flex-shrink: 0;
+  transition: background 0.05s;
+}
+.piano-key-3d-black-active {
+  background: #3b82f6 !important;
+  box-shadow: 0 0 10px #3b82f6 !important;
+}
+
+.piano-key-3d-white-body {
+  flex: 1;
+  height: 20px;
+  background: #eaeaf0;
+  border-right: 1px solid #27272a;
+  border-bottom: 1px solid #d4d4dc;
+  transition: background 0.05s;
+}
+.piano-key-3d-white-active {
+  background: #bfdbfe !important;
+}
+

@@ -46,7 +46,6 @@ export const PianoRoll: React.FC = () => {
   // Auto-scroll to center on octave 4 (around C4) on first open
   useEffect(() => {
     if (pianoRollTrackId && scrollContainerRef.current) {
-      // Row height is ~20px. C4 (midi 60) is index 12 in PITCH_RANGE
       scrollContainerRef.current.scrollTop = 12 * 20 - 60;
     }
   }, [pianoRollTrackId]);
@@ -88,21 +87,7 @@ export const PianoRoll: React.FC = () => {
 
   return (
     <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: "rgba(0, 0, 0, 0.78)",
-        backdropFilter: "blur(6px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 9999,
-        padding: "16px",
-        boxSizing: "border-box",
-      }}
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 box-border"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           closePianoRoll();
@@ -110,78 +95,29 @@ export const PianoRoll: React.FC = () => {
       }}
     >
       {/* Floating Piano Roll Window */}
-      <div
-        style={{
-          width: "1080px",
-          maxWidth: "96vw",
-          height: "600px",
-          maxHeight: "92vh",
-          background: "#16161a",
-          border: "1px solid #3f3f46",
-          borderRadius: "8px",
-          boxShadow: "0 24px 64px rgba(0, 0, 0, 0.85)",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-          userSelect: "none",
-        }}
-      >
+      <div className="w-[1080px] max-w-[96vw] h-[600px] max-h-[92vh] bg-zinc-950 border border-zinc-700 rounded-lg shadow-2xl flex flex-col overflow-hidden select-none">
         {/* Title Bar */}
-        <div
-          style={{
-            height: "40px",
-            background: "#1f1f24",
-            borderBottom: "1px solid #27272a",
-            padding: "0 14px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexShrink: 0,
-          }}
-        >
+        <div className="h-10 bg-zinc-900 border-b border-zinc-800 px-3.5 flex items-center justify-between shrink-0">
           {/* Left: Window Title & Icon */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <span
-              style={{
-                fontSize: "13px",
-                fontWeight: "bold",
-                color: "#f4f4f5",
-                letterSpacing: "0.5px",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-              }}
-            >
+          <div className="flex items-center gap-2.5">
+            <span className="text-[13px] font-bold text-zinc-100 tracking-wide flex items-center gap-1.5 font-mono">
               🎹 Piano Roll —{" "}
               <span style={{ color: noteAccentColor }}>{track.name}</span>
             </span>
 
             {/* Quick Track Switcher Pills */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-                marginLeft: "12px",
-              }}
-            >
+            <div className="flex items-center gap-1 ml-3">
               {tracks.map((t) => {
                 const isSelected = t.id === track.id;
                 return (
                   <button
                     key={t.id}
                     onClick={() => openPianoRoll(t.id)}
-                    style={{
-                      background: isSelected ? "#3b82f6" : "#27272a",
-                      color: isSelected ? "#fff" : "#a1a1aa",
-                      border: "none",
-                      borderRadius: "3px",
-                      padding: "2px 8px",
-                      fontSize: "10px",
-                      fontWeight: isSelected ? "bold" : "normal",
-                      cursor: "pointer",
-                      transition: "all 0.15s",
-                    }}
+                    className={`px-2 py-0.5 rounded text-[10px] cursor-pointer transition-colors ${
+                      isSelected
+                        ? "bg-blue-600 text-white font-bold"
+                        : "bg-zinc-800 hover:bg-zinc-700 text-zinc-400 font-normal"
+                    }`}
                     title={`Switch to ${t.name}`}
                   >
                     {t.name}
@@ -192,19 +128,10 @@ export const PianoRoll: React.FC = () => {
           </div>
 
           {/* Right: Window Controls */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div className="flex items-center gap-2">
             <button
               onClick={closePianoRoll}
-              style={{
-                background: "transparent",
-                border: "none",
-                color: "#a1a1aa",
-                fontSize: "18px",
-                fontWeight: "bold",
-                cursor: "pointer",
-                padding: "2px 6px",
-                lineHeight: 1,
-              }}
+              className="bg-transparent border-none text-zinc-400 hover:text-white text-lg font-bold cursor-pointer px-1.5 leading-none"
               title="Close Piano Roll (Esc)"
             >
               &times;
@@ -213,23 +140,11 @@ export const PianoRoll: React.FC = () => {
         </div>
 
         {/* Beats / Bars Ruler Header */}
-        <div
-          style={{
-            height: "26px",
-            background: "#18181c",
-            borderBottom: "1px solid #27272a",
-            display: "flex",
-            alignItems: "center",
-            flexShrink: 0,
-            paddingLeft: "74px", // Align with 74px keyboard width
-          }}
-        >
+        <div className="h-[26px] bg-zinc-900 border-b border-zinc-800 flex items-center shrink-0 pl-[74px]">
           <div
+            className="w-full h-full grid"
             style={{
-              display: "grid",
               gridTemplateColumns: "repeat(64, minmax(13px, 1fr))",
-              width: "100%",
-              height: "100%",
             }}
           >
             {Array.from({ length: 64 }, (_, step) => {
@@ -241,28 +156,15 @@ export const PianoRoll: React.FC = () => {
               return (
                 <div
                   key={step}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "9px",
-                    fontFamily: "monospace",
-                    fontWeight: isBarStart ? "bold" : "normal",
-                    color: isBarStart
-                      ? "#60a5fa"
+                  className={`flex items-center justify-center text-[9px] font-mono ${
+                    isBarStart
+                      ? "font-bold text-blue-400 border-l-2 border-l-blue-500"
                       : isBeatStart
-                        ? "#a1a1aa"
-                        : "#52525b",
-                    borderLeft: isBarStart
-                      ? "2px solid #3b82f6"
-                      : isBeatStart
-                        ? "1px solid #3f3f46"
-                        : "1px solid transparent",
-                    background:
-                      activeStep === step
-                        ? "rgba(59, 130, 246, 0.25)"
-                        : "transparent",
-                  }}
+                        ? "text-zinc-400 border-l border-l-zinc-700"
+                        : "text-zinc-600 border-l border-l-transparent"
+                  } ${
+                    activeStep === step ? "bg-blue-500/25" : "bg-transparent"
+                  }`}
                 >
                   {isBarStart ? `${barNum}` : isBeatStart ? `.${beatNum}` : ""}
                 </div>
@@ -274,33 +176,16 @@ export const PianoRoll: React.FC = () => {
         {/* Main Piano Roll Body: Vertical Piano Keys (Left) + Multi-pitch 64-step Grid (Right) */}
         <div
           ref={scrollContainerRef}
-          style={{
-            flex: 1,
-            overflowY: "auto",
-            overflowX: "auto",
-            display: "flex",
-            position: "relative",
-            background: "#121215",
-          }}
+          className="flex-1 overflow-y-auto overflow-x-auto flex relative bg-zinc-950"
         >
           {/* 1. Left Authentic Piano Keys Column (74px width) */}
-          <div
-            style={{
-              width: "74px",
-              flexShrink: 0,
-              background: "#16161a",
-              borderRight: "2px solid #27272a",
-              position: "sticky",
-              left: 0,
-              zIndex: 10,
-            }}
-          >
+          <div className="w-[74px] shrink-0 bg-zinc-950 border-r-2 border-zinc-800 sticky left-0 z-10">
             {PITCH_RANGE.map((midi) => {
               const isBlack = isBlackKey(midi);
               const label = getNoteLabel(midi);
               const isC = midi % 12 === 0;
-              const isEFBoundary = midi % 12 === 5; // F is above E
-              const isBCBoundary = midi % 12 === 0; // C is above B
+              const isEFBoundary = midi % 12 === 5;
+              const isBCBoundary = midi % 12 === 0;
               const activeStepNotes = track.notes?.[activeStep]?.length
                 ? track.notes[activeStep]
                 : [track.pitches[activeStep]];
@@ -313,100 +198,57 @@ export const PianoRoll: React.FC = () => {
                 <div
                   key={midi}
                   onClick={() => auditionTrack(trackIndex, midi)}
-                  style={{
-                    height: "20px",
-                    boxSizing: "border-box",
-                    display: "flex",
-                    alignItems: "stretch",
-                    cursor: "pointer",
-                    position: "relative",
-                  }}
+                  className="h-5 box-border flex items-stretch cursor-pointer relative"
                   title={`Click to audition ${label}`}
                 >
                   {isBlack ? (
                     <>
                       {/* Black Key: Elevated 3D Protrusion from Left Edge */}
                       <div
-                        style={{
-                          width: "44px",
-                          height: "18px",
-                          margin: "1px 0",
-                          background: isCurrentlyPlaying
-                            ? "#3b82f6"
-                            : "linear-gradient(90deg, #18181c 0%, #26262e 70%, #353540 100%)",
-                          borderRadius: "0 3px 3px 0",
-                          borderRight: "1px solid #101014",
-                          borderTop: "1px solid #3f3f46",
-                          borderBottom: "1px solid #09090b",
-                          boxShadow: isCurrentlyPlaying
-                            ? "0 0 10px #3b82f6"
-                            : "1px 2px 3px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.15)",
-                          zIndex: 2,
-                          flexShrink: 0,
-                          transition: "background 0.05s",
-                        }}
+                        className={`piano-key-3d-black ${
+                          isCurrentlyPlaying ? "piano-key-3d-black-active" : ""
+                        }`}
                       />
                       {/* White Key Body Underneath (Right Side) */}
                       <div
-                        style={{
-                          flex: 1,
-                          height: "20px",
-                          background: isCurrentlyPlaying
-                            ? "#bfdbfe"
-                            : "#e4e4ea",
-                          borderRight: "1px solid #27272a",
-                          borderBottom: "1px solid #d4d4dc",
-                        }}
+                        className={`piano-key-3d-white-body ${
+                          isCurrentlyPlaying ? "piano-key-3d-white-active" : ""
+                        }`}
                       />
                     </>
                   ) : (
                     <>
                       {/* White Key Left Area (Between Black Keys) */}
                       <div
+                        className={`w-[44px] h-5 shrink-0 transition-colors ${
+                          isCurrentlyPlaying ? "bg-blue-200" : "bg-[#f2f2f6]"
+                        } ${
+                          isEFBoundary || isBCBoundary
+                            ? "border-b border-b-zinc-400"
+                            : "border-b border-b-zinc-300"
+                        }`}
                         style={{
-                          width: "44px",
-                          height: "20px",
-                          background: isCurrentlyPlaying
-                            ? "#bfdbfe"
-                            : "#f2f2f6",
                           boxShadow:
                             "inset 0 1px 0 #ffffff, inset 0 -1px 0 #d4d4dc",
-                          borderBottom:
-                            isEFBoundary || isBCBoundary
-                              ? "1px solid #a1a1aa"
-                              : "1px solid #d4d4dc",
-                          flexShrink: 0,
-                          transition: "background 0.05s",
                         }}
                       />
                       {/* White Key Right Area (Next to Grid) with Octave Label on C */}
                       <div
-                        style={{
-                          flex: 1,
-                          height: "20px",
-                          background: isCurrentlyPlaying
-                            ? "#bfdbfe"
-                            : "#eaeaf0",
-                          borderRight: "1px solid #27272a",
-                          borderBottom:
-                            isEFBoundary || isBCBoundary
-                              ? "1px solid #a1a1aa"
-                              : "1px solid #d4d4dc",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          paddingRight: "2px",
-                          transition: "background 0.05s",
-                        }}
+                        className={`piano-key-3d-white-body flex items-center justify-center pr-0.5 ${
+                          isCurrentlyPlaying ? "piano-key-3d-white-active" : ""
+                        } ${
+                          isEFBoundary || isBCBoundary
+                            ? "!border-b-zinc-400"
+                            : "!border-b-zinc-300"
+                        }`}
                       >
                         {isC && (
                           <span
-                            style={{
-                              fontSize: "10px",
-                              fontWeight: "bold",
-                              color: isCurrentlyPlaying ? "#1e3a8a" : "#475569",
-                              fontFamily: "monospace",
-                            }}
+                            className={`text-[10px] font-bold font-mono ${
+                              isCurrentlyPlaying
+                                ? "text-blue-900"
+                                : "text-slate-600"
+                            }`}
                           >
                             {label}
                           </span>
@@ -420,28 +262,14 @@ export const PianoRoll: React.FC = () => {
           </div>
 
           {/* 2. Right Note Matrix Grid (64 Columns x 37 Pitch Rows) */}
-          <div
-            style={{
-              flex: 1,
-              minWidth: "832px", // 64 steps * 13px min
-              display: "flex",
-              flexDirection: "column",
-              position: "relative",
-            }}
-          >
+          <div className="flex-1 min-w-[832px] flex flex-col relative">
             {/* Playhead Vertical Overlay Line */}
             {activeStep >= 0 && (
               <div
+                className="absolute inset-y-0 bg-blue-500/20 border-l-2 border-l-blue-400 pointer-events-none z-10"
                 style={{
-                  position: "absolute",
-                  top: 0,
-                  bottom: 0,
                   left: `${(activeStep / 64) * 100}%`,
                   width: `${(1 / 64) * 100}%`,
-                  background: "rgba(59, 130, 246, 0.22)",
-                  borderLeft: "2px solid #60a5fa",
-                  pointerEvents: "none",
-                  zIndex: 5,
                 }}
               />
             )}
@@ -452,20 +280,17 @@ export const PianoRoll: React.FC = () => {
               return (
                 <div
                   key={midi}
+                  className={`h-5 box-border grid border-b border-zinc-900 ${
+                    isBlack ? "bg-zinc-950" : "bg-[#191920]"
+                  }`}
                   style={{
-                    height: "20px",
-                    boxSizing: "border-box",
-                    display: "grid",
                     gridTemplateColumns: "repeat(64, minmax(13px, 1fr))",
-                    borderBottom: "1px solid #1f1f23",
-                    background: isBlack ? "#16161a" : "#1a1a20",
                   }}
                 >
                   {Array.from({ length: 64 }, (_, stepIdx) => {
                     const isBarStart = stepIdx % 16 === 0;
                     const isBeatStart = stepIdx % 4 === 0;
 
-                    // Check if this step has an active note at this exact pitch (supports chords)
                     const stepNotes = track.notes?.[stepIdx]?.length
                       ? track.notes[stepIdx]
                       : track.steps[stepIdx]
@@ -479,46 +304,22 @@ export const PianoRoll: React.FC = () => {
                         onClick={() =>
                           togglePianoRollNote(trackIndex, stepIdx, midi)
                         }
-                        style={{
-                          height: "100%",
-                          boxSizing: "border-box",
-                          borderLeft: isBarStart
-                            ? "2px solid #27272a"
+                        className={`h-full box-border flex items-center justify-center cursor-pointer p-[1px] relative ${
+                          isBarStart
+                            ? "border-l-2 border-l-zinc-700"
                             : isBeatStart
-                              ? "1px solid #222228"
-                              : "1px solid rgba(255, 255, 255, 0.03)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                          padding: "1px",
-                          position: "relative",
-                        }}
+                              ? "border-l border-l-zinc-800"
+                              : "border-l border-l-white/[0.03]"
+                        }`}
                         title={`Step ${stepIdx + 1} • ${getNoteLabel(midi)}`}
                       >
                         {hasNote && (
                           <div
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              background: isMelodic
-                                ? "linear-gradient(180deg, #c084fc 0%, #9333ea 100%)"
-                                : "linear-gradient(180deg, #fb923c 0%, #ea580c 100%)",
-                              borderRadius: "2px",
-                              boxShadow: isMelodic
-                                ? "0 0 6px rgba(168, 85, 247, 0.5)"
-                                : "0 0 6px rgba(249, 115, 22, 0.5)",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              color: "#fff",
-                              fontSize: "8px",
-                              fontWeight: "bold",
-                              fontFamily: "monospace",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                            }}
+                            className={`w-full h-full rounded-[2px] flex items-center justify-center text-white text-[8px] font-bold font-mono overflow-hidden truncate whitespace-nowrap ${
+                              isMelodic
+                                ? "bg-gradient-to-b from-purple-400 to-purple-600 shadow-[0_0_6px_rgba(168,85,247,0.5)]"
+                                : "bg-gradient-to-b from-orange-400 to-orange-600 shadow-[0_0_6px_rgba(249,115,22,0.5)]"
+                            }`}
                           >
                             {getNoteLabel(midi)}
                           </div>
@@ -533,30 +334,17 @@ export const PianoRoll: React.FC = () => {
         </div>
 
         {/* Footer Info & Shortcuts */}
-        <div
-          style={{
-            height: "30px",
-            background: "#18181c",
-            borderTop: "1px solid #27272a",
-            padding: "0 14px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            fontSize: "11px",
-            color: "#71717a",
-            flexShrink: 0,
-            fontFamily: "monospace",
-          }}
-        >
+        <div className="h-[30px] bg-zinc-900 border-t border-zinc-800 px-3.5 flex items-center justify-between text-[11px] text-zinc-500 shrink-0 font-mono">
           <div>
             💡 Click grid cell to place/remove note • Click piano key to
             audition • Space: Play/Stop
           </div>
           <div>
-            Press <kbd style={{ color: "#e4e4e7" }}>Esc</kbd> to Close
+            Press <kbd className="text-zinc-200">Esc</kbd> to Close
           </div>
         </div>
       </div>
     </div>
   );
 };
+export default PianoRoll;
