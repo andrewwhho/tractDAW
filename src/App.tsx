@@ -45,7 +45,7 @@ export const App: React.FC = () => {
     // Load initial sounds
     engine.sampleLoader.loadAllDefaultSamples().then(() => {
       setIsReady(true);
-      console.log("✅ tractDAW AudioEngine Ready!");
+      console.log("tractDAW AudioEngine Ready");
     });
 
     return () => {
@@ -114,8 +114,8 @@ export const App: React.FC = () => {
   // DAW Main Content JSX
   const dawContent = (
     <div className="flex flex-col gap-3 w-full box-border">
-      {/* Transport Bar & View Switcher (Clean Two-Tier Layout) */}
-      <section className="bg-zinc-900 border border-zinc-800 rounded-md p-2.5 sm:px-3.5 flex flex-col gap-2.5">
+      {/* Transport Bar & View Switcher */}
+      <section className=" border-zinc-800 p-2.5 sm:px-3.5 flex flex-col gap-2.5">
         {/* Tier 1: Audio Playback & Clock */}
         <div className="flex items-center justify-between flex-wrap gap-2.5">
           {/* Left: Play/Stop & BPM */}
@@ -131,7 +131,7 @@ export const App: React.FC = () => {
                   : "bg-blue-600 hover:bg-blue-500"
               }`}
             >
-              {isPlaying ? "■ STOP" : "▶ PLAY"}
+              {isPlaying ? "■" : "▶"}
             </button>
 
             {/* BPM Stepper */}
@@ -183,7 +183,7 @@ export const App: React.FC = () => {
           </div>
 
           {/* Right: Master Volume & Status */}
-          <div className="flex items-center gap-2.5">
+          {/* <div className="flex items-center gap-2.5">
             <div className="flex items-center gap-1.5">
               <span className="text-zinc-400 text-[10px] font-bold">
                 MASTER:
@@ -201,36 +201,13 @@ export const App: React.FC = () => {
                 {Math.round(masterVolume * 100)}%
               </span>
             </div>
-
-            <div className="flex items-center gap-1.5">
-              <span
-                className={`inline-block w-2 h-2 rounded-full ${
-                  isReady
-                    ? "bg-emerald-500 shadow-[0_0_6px_#22c55e]"
-                    : "bg-yellow-500"
-                }`}
-              />
-              <span
-                className={`text-[10px] font-bold ${
-                  isReady ? "text-emerald-400" : "text-yellow-400"
-                }`}
-              >
-                {isReady ? "ONLINE" : "LOADING"}
-              </span>
-            </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Tier 2: Studio Layout & Project Actions */}
         <div className="flex items-center justify-between flex-wrap gap-2 border-t border-zinc-800 pt-2">
           {/* Studio Layout Indicator & Track Capacity */}
           <div className="flex items-center gap-2.5">
-            <span className="text-[11px] font-bold text-blue-400 flex items-center gap-1.5 tracking-wide">
-              🪟 SPLIT VIEW{" "}
-              <span className="text-zinc-500 font-normal text-[10px]">
-                (Channel Rack + Mixer Console)
-              </span>
-            </span>
 
             {/* Track Limit Pill */}
             <span
@@ -250,17 +227,17 @@ export const App: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={clearAll}
-              className="bg-zinc-800 hover:bg-zinc-700 text-red-400 border border-zinc-700 rounded px-2 py-1 text-[10px] font-bold cursor-pointer transition-colors"
+              className="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 border border-zinc-700 rounded px-2 py-1 text-[10px] font-bold cursor-pointer transition-colors"
               title="Clear all note triggers"
             >
-              🗑 CLEAR
+              CLEAR
             </button>
             <button
               onClick={reloadDemo}
-              className="bg-zinc-800 hover:bg-zinc-700 text-blue-300 border border-zinc-700 rounded px-2 py-1 text-[10px] font-bold cursor-pointer transition-colors"
+              className="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 border border-zinc-700 rounded px-2 py-1 text-[10px] font-bold cursor-pointer transition-colors"
               title="Reload initial 4-bar groove"
             >
-              ↺ RELOAD
+              RELOAD
             </button>
 
             {/* Window Mode Toggle */}
@@ -294,12 +271,7 @@ export const App: React.FC = () => {
 
       {/* Compact Status / Tips Footer */}
       <footer className="flex justify-between items-center text-zinc-500 text-[10px] py-1.5 px-1 border-t border-zinc-900 mt-1 font-mono">
-        <div>
-          💡 <strong className="text-zinc-400">Tips:</strong> Space: Play/Stop •
-          Home/0: Rewind • Esc: Dismiss Note • Click track name to audition
-          sound • Max 10 Tracks
-        </div>
-        <div>tractDAW • Max 10 Tracks • 64 Steps</div>
+        © 2025 Andrew Ho. All Rights Reserved.
       </footer>
     </div>
   );
@@ -314,15 +286,14 @@ export const App: React.FC = () => {
           <div className="h-9 bg-zinc-900/90 border-b border-zinc-800 px-3.5 flex justify-between items-center shrink-0">
             <div className="flex items-center gap-2">
               <span className="font-bold text-[13px] text-zinc-100 tracking-wide">
-                tractDAW<span className="text-blue-500">.</span>
+                tractDAW.
               </span>
-              <span className="text-zinc-500 text-[11px]">(mini web DAW)</span>
             </div>
 
             <div className="flex items-center gap-2.5">
               <button
                 onClick={() => setContainerMode("fullscreen")}
-                className="bg-transparent border border-zinc-700 text-zinc-400 hover:text-zinc-200 rounded px-1.5 py-0.5 text-[10px] cursor-pointer transition-colors"
+                className="bg-transparent text-zinc-400 hover:text-zinc-200 px-1.5 py-0.5 text-[10px] cursor-pointer transition-colors"
                 title="Switch to full width view"
               >
                 EXPAND ↗
@@ -354,21 +325,17 @@ export const App: React.FC = () => {
         <header className="flex justify-between items-center border-b border-zinc-800 pb-2.5">
           <div>
             <h1 className="m-0 text-[17px] tracking-wider flex items-center gap-2 font-bold">
-              tractDAW{" "}
-              <span className="text-blue-400 text-[11px] bg-blue-950/80 border border-blue-800 px-1.5 py-0.5 rounded">
-                STUDIO
-              </span>
+              tractDAW.
             </h1>
             <div className="text-[11px] text-zinc-500 mt-0.5">
-              64-Step Channel Rack • Track Mixer Console • Decoupled State
-              Engine
+              custom Web DAW.
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={() => setContainerMode("windowpane")}
-              className="bg-zinc-900 hover:bg-zinc-800 border border-blue-500 text-blue-300 rounded px-2.5 py-1 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+              className="bg-transparent hover:underline text-blue-300px-2.5 py-1 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
               title="Preview inside portfolio WindowPane (1280x720)"
             >
               PREVIEW IN WINDOWPANE (1280×720)
