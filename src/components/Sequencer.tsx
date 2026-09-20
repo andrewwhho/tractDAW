@@ -38,6 +38,7 @@ export const Sequencer: React.FC = () => {
   const onAddTrack = useDawStore((state) => state.addTrack);
   const onDeleteTrack = useDawStore((state) => state.deleteTrack);
   const onActivePitchChange = useDawStore((state) => state.setActivePitch);
+  const openPianoRoll = useDawStore((state) => state.openPianoRoll);
 
   // Pitch picker popover state
   const [pitchPicker, setPitchPicker] = useState<{
@@ -311,6 +312,30 @@ export const Sequencer: React.FC = () => {
                         </option>
                       ))}
                     </select>
+                  )}
+
+                  {/* Open Piano Roll Button */}
+                  {isMelodic && (
+                    <button
+                      onClick={() => openPianoRoll(track.id)}
+                      style={{
+                        background: "#7c3aed",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "3px",
+                        fontSize: "9px",
+                        fontWeight: "bold",
+                        padding: "2px 5px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "2px",
+                        flexShrink: 0,
+                      }}
+                      title={`Open Piano Roll for ${track.name}`}
+                    >
+                      🎹
+                    </button>
                   )}
 
                   {/* Delete Track Button */}

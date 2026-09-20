@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { AudioEngine } from "./audio/AudioEngine";
 import { Sequencer } from "./components/Sequencer";
 import { Mixer } from "./components/Mixer";
+import { PianoRoll } from "./components/PianoRoll";
 import { useDawStore } from "./store/useDawStore";
 
 export const App: React.FC = () => {
@@ -482,6 +483,7 @@ export const App: React.FC = () => {
       >
         <Sequencer />
         <Mixer />
+        <PianoRoll />
       </div>
 
       {/* Compact Status / Tips Footer */}

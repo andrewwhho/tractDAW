@@ -160,6 +160,7 @@ export interface DawState {
   // Track State (Capped at 10 max)
   tracks: Track[];
   activePitches: Record<string, number>;
+  pianoRollTrackId: string | null;
 
   // Container View Mode
   containerMode: "fullscreen" | "windowpane";
@@ -170,6 +171,9 @@ export interface DawState {
   setIsPlaying: (playing: boolean) => void;
   setActiveStep: (step: number) => void;
   setContainerMode: (mode: "fullscreen" | "windowpane") => void;
+  openPianoRoll: (trackId: string) => void;
+  closePianoRoll: () => void;
+  togglePianoRollNote: (trackIndex: number, stepIndex: number, midiNote: number) => void;
   togglePlay: () => Promise<void>;
   resetPlayhead: () => void;
   setBpm: (bpm: number) => void;
@@ -201,6 +205,7 @@ export const useDawStore = create<DawState>((set, get) => ({
     track_808: 60,
     track_synth: 60,
   },
+  pianoRollTrackId: null,
   containerMode: "fullscreen",
 
   setEngine: (engine) => set({ engine }),
@@ -208,6 +213,40 @@ export const useDawStore = create<DawState>((set, get) => ({
   setIsPlaying: (isPlaying) => set({ isPlaying }),
   setActiveStep: (activeStep) => set({ activeStep }),
   setContainerMode: (containerMode) => set({ containerMode }),
+
+  openPianoRoll: (trackId) => set({ pianoRollTrackId: trackId }),
+  closePianoRoll: () => set({ pianoRollTrackId: null }),
+
+  togglePianoRollNote: (trackIndex, stepIndex, midiNote) => {
+    const { tracks, engine, activePitches } = get();
+    const track = tracks[trackIndex];
+    if (!track) return;
+
+    const newSteps = [...track.steps];
+    const newPitches = [...track.pitches];
+
+    const isCurrentActive = newSteps[stepIndex] && newPitches[stepIndex] === midiNote;
+
+    if (isCurrentActive) {
+      newSteps[stepIndex] = false;
+    } else {
+      newSteps[stepIndex] = true;
+      newPitches[stepIndex] = midiNote;
+      engine?.auditionTrackStep(trackIndex, midiNote);
+    }
+
+    const updatedTracks = tracks.map((t, idx) =>
+      idx === trackIndex ? { ...t, steps: newSteps, pitches: newPitches } : t
+    );
+
+    engine?.setTracks(updatedTracks);
+    set({
+      tracks: updatedTracks,
+      activePitches: isCurrentActive
+        ? activePitches
+        : { ...activePitches, [track.id]: midiNote },
+    });
+  },
 
   togglePlay: async () => {
     const { engine, isReady, isPlaying } = get();
@@ -351,11 +390,17 @@ export const useDawStore = create<DawState>((set, get) => ({
   },
 
   deleteTrack: (trackIndex) => {
-    const { tracks, engine } = get();
+    const { tracks, engine, pianoRollTrackId } = get();
     if (tracks.length <= 1) return;
 
+    const targetTrack = tracks[trackIndex];
     engine?.removeTrack(trackIndex);
-    set({ tracks: tracks.filter((_, idx) => idx !== trackIndex) });
+    const newTracks = tracks.filter((_, idx) => idx !== trackIndex);
+    set({
+      tracks: newTracks,
+      pianoRollTrackId:
+        targetTrack && targetTrack.id === pianoRollTrackId ? null : pianoRollTrackId,
+    });
   },
 
   auditionTrack: (trackIndex, midiNote) => {
