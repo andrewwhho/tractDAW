@@ -127,9 +127,6 @@ export const Sequencer: React.FC = () => {
         <div className="flex items-center mb-2.5">
           <div className="w-[220px] shrink-0 text-[11px] font-bold text-zinc-500 flex items-center gap-1.5 font-mono">
             CHANNEL RACK{" "}
-            <span className="text-blue-400 text-[10px]">
-              ● 64 STEPS (4 BARS)
-            </span>
           </div>
           <div className="flex gap-[3px] flex-1">
             {displayedStepIndices.map((globalStepIdx) => {
@@ -238,26 +235,6 @@ export const Sequencer: React.FC = () => {
                       </option>
                     ))}
                   </select>
-
-                  {/* Melodic Default Note Selector */}
-                  {isMelodic && (
-                    <select
-                      value={currentDrawingPitch}
-                      onChange={(e) => {
-                        const newPitch = parseInt(e.target.value, 10);
-                        onActivePitchChange(track.id, newPitch);
-                        onAuditionTrack(trackIdx, newPitch);
-                      }}
-                      className="bg-zinc-800 text-purple-300 border border-zinc-700 rounded text-[9px] p-0.5 font-bold cursor-pointer outline-none"
-                      title="Default note when adding new steps"
-                    >
-                      {NOTE_OPTIONS.map((n) => (
-                        <option key={n.midi} value={n.midi}>
-                          {n.label}
-                        </option>
-                      ))}
-                    </select>
-                  )}
 
                   {/* Open Piano Roll Button */}
                   {isMelodic && (

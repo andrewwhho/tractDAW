@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AudioEngine } from "./audio/AudioEngine";
 import { Sequencer } from "./components/Sequencer";
 import { Mixer } from "./components/Mixer";
@@ -23,6 +23,26 @@ export const App: React.FC = () => {
   const resetPlayhead = useDawStore((state) => state.resetPlayhead);
   const clearAll = useDawStore((state) => state.clearAll);
   const reloadDemo = useDawStore((state) => state.reloadDemo);
+
+  const [isEditingBpm, setIsEditingBpm] = useState(false);
+  const [bpmInputVal, setBpmInputVal] = useState(String(bpm));
+
+  // Sync input value if bpm changes externally (e.g. via +/- buttons)
+  useEffect(() => {
+    if (!isEditingBpm) {
+      setBpmInputVal(String(bpm));
+    }
+  }, [bpm, isEditingBpm]);
+
+  const handleBpmCommit = () => {
+    const parsed = parseInt(bpmInputVal, 10);
+    if (!isNaN(parsed) && parsed > 0) {
+      setBpm(parsed);
+    } else {
+      setBpmInputVal(String(bpm));
+    }
+    setIsEditingBpm(false);
+  };
 
   const engineRef = useRef<AudioEngine | null>(null);
   const stepQueueRef = useRef<{ step: number; time: number }[]>([]);
@@ -116,14 +136,14 @@ export const App: React.FC = () => {
     <div className="flex flex-col gap-3 w-full box-border">
       {/* Transport Bar & View Switcher */}
       <section className=" border-zinc-800 p-2.5 sm:px-3.5 flex flex-col gap-2.5">
-        {/* Tier 1: Audio Playback & Clock */}
+        {/*Audio Playback & Clock */}
         <div className="flex items-center justify-between flex-wrap gap-2.5">
           {/* Left: Play/Stop & BPM */}
           <div className="flex items-center gap-2.5">
             <button
               onClick={togglePlay}
               disabled={!isReady}
-              className={`px-4 py-1.5 rounded text-white font-bold text-xs min-w-[85px] tracking-wide transition-all ${
+              className={`px-4 py-1.5 rounded text-white font-bold text-xs min-w-[35px] tracking-wide transition-all ${
                 isReady ? "cursor-pointer" : "cursor-not-allowed opacity-50"
               } ${
                 isPlaying
@@ -134,96 +154,103 @@ export const App: React.FC = () => {
               {isPlaying ? "■" : "▶"}
             </button>
 
-            {/* BPM Stepper */}
-            <div className="flex items-center bg-zinc-950 px-1.5 py-0.5 rounded border border-zinc-700 gap-1">
-              <span className="text-zinc-500 text-[10px] font-bold">BPM:</span>
+            {/* BPM Stepper & Editable Input */}
+            <div className="flex items-center bg-zinc-950 px-1.5 py-0.5 border border-zinc-700 rounded gap-1">
+              <span className="text-zinc-500 text-[11px] font-bold">BPM:</span>
               <button
                 onClick={() => setBpm(bpm - 5)}
-                className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded px-1.5 py-0.5 text-[10px] font-bold cursor-pointer transition-colors"
+                className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded px-1.5 py-0.5 text-[11px] font-bold cursor-pointer transition-colors"
+                title="Decrease BPM by 5"
               >
-                -5
+                -
               </button>
-              <span className="text-[13px] font-bold min-w-[36px] text-center text-zinc-100 font-mono">
-                {bpm}
-              </span>
+              {isEditingBpm ? (
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoFocus
+                  value={bpmInputVal}
+                  onChange={(e) =>
+                    setBpmInputVal(e.target.value.replace(/[^0-9]/g, ""))
+                  }
+                  onFocus={(e) => e.target.select()}
+                  onBlur={handleBpmCommit}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleBpmCommit();
+                    } else if (e.key === "Escape") {
+                      setBpmInputVal(String(bpm));
+                      setIsEditingBpm(false);
+                    }
+                  }}
+                  className="w-11 h-[22px] text-center text-[13px] font-bold font-mono text-amber-300 bg-zinc-900 border border-blue-500 rounded outline-none px-0.5"
+                  title="Type BPM (60-240) and press Enter"
+                />
+              ) : (
+                <span
+                  onClick={() => {
+                    setBpmInputVal(String(bpm));
+                    setIsEditingBpm(true);
+                  }}
+                  title="Click to type BPM (60-240)"
+                  className="text-[13px] font-bold min-w-[36px] text-center text-zinc-100 font-mono cursor-pointer rounded px-1 hover:bg-zinc-800 hover:text-amber-300 border border-transparent hover:border-zinc-700 transition-colors select-none"
+                >
+                  {bpm}
+                </span>
+              )}
               <button
                 onClick={() => setBpm(bpm + 5)}
                 className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded px-1.5 py-0.5 text-[10px] font-bold cursor-pointer transition-colors"
+                title="Increase BPM by 5"
               >
-                +5
+                +
               </button>
             </div>
-          </div>
 
-          {/* Center: LCD Position Display */}
-          <div className="bg-zinc-950 px-3 py-1 rounded border border-zinc-700 flex items-center gap-2.5 font-mono">
-            <div>
-              <span className="text-zinc-500 text-[10px]">POS:</span>{" "}
+            {/* Studio Layout Indicator & Track Capacity */}
+            <div className="flex items-center gap-2.5">
+              {/* Track Limit*/}
               <span
-                className={`font-bold text-xs ${
-                  isPlaying ? "text-blue-400" : "text-zinc-400"
+                className={`px-2 py-0.5 text-[11px] font-bold font-mono ${
+                  tracks.length >= 10
+                    ? " text-red-400 border-red-900"
+                    : tracks.length >= 8
+                      ? "text-yellow-400 border-yellow-900"
+                      : "text-slate-400 border-zinc-800"
                 }`}
               >
-                BAR {activeBarIndex >= 0 ? activeBarIndex + 1 : 1} : BEAT{" "}
-                {activeBeat} : 16TH {active16th}
+                {tracks.length} / 10 TRACKS
               </span>
             </div>
-            <span className="text-zinc-700">|</span>
-            <div className="text-zinc-400 text-[11px]">
-              STEP:{" "}
-              <span
-                className={`font-bold ${
-                  isPlaying ? "text-emerald-400" : "text-zinc-200"
-                }`}
-              >
-                {activeStep >= 0 ? activeStep + 1 : 0}
-              </span>{" "}
-              / 64
+
+            {/* Center: LCD Position Display */}
+            <div className="px-3 py-1 text-[11px] flex items-center gap-2.5 font-mono">
+              <div>
+                <span className="text-zinc-500 text-[11px]">POS:</span>{" "}
+                <span
+                  className={`font-bold text-xs ${
+                    isPlaying ? "text-blue-400" : "text-zinc-400"
+                  }`}
+                >
+                  BAR {activeBarIndex >= 0 ? activeBarIndex + 1 : 1} : BEAT{" "}
+                  {activeBeat} : 16TH {active16th}
+                </span>
+              </div>
+              <span className="text-zinc-700">|</span>
+              <div className="text-zinc-400 text-[11px]">
+                STEP:{" "}
+                <span
+                  className={`font-bold ${
+                    isPlaying ? "text-emerald-400" : "text-zinc-200"
+                  }`}
+                >
+                  {activeStep >= 0 ? activeStep + 1 : 0}
+                </span>{" "}
+                / 64
+              </div>
             </div>
           </div>
 
-          {/* Right: Master Volume & Status */}
-          {/* <div className="flex items-center gap-2.5">
-            <div className="flex items-center gap-1.5">
-              <span className="text-zinc-400 text-[10px] font-bold">
-                MASTER:
-              </span>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={masterVolume}
-                onChange={(e) => setMasterVolume(parseFloat(e.target.value))}
-                className="w-[70px] accent-blue-600 cursor-pointer"
-              />
-              <span className="text-[11px] text-blue-300 min-w-[30px] font-mono">
-                {Math.round(masterVolume * 100)}%
-              </span>
-            </div>
-          </div> */}
-        </div>
-
-        {/* Tier 2: Studio Layout & Project Actions */}
-        <div className="flex items-center justify-between flex-wrap gap-2 border-t border-zinc-800 pt-2">
-          {/* Studio Layout Indicator & Track Capacity */}
-          <div className="flex items-center gap-2.5">
-
-            {/* Track Limit Pill */}
-            <span
-              className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono border ${
-                tracks.length >= 10
-                  ? "bg-red-950 text-red-400 border-red-900"
-                  : tracks.length >= 8
-                    ? "bg-amber-950 text-yellow-400 border-yellow-900"
-                    : "bg-zinc-950 text-slate-400 border-zinc-800"
-              }`}
-            >
-              {tracks.length} / 10 TRACKS
-            </span>
-          </div>
-
-          {/* Quick Actions & Window Mode */}
           <div className="flex items-center gap-2">
             <button
               onClick={clearAll}
@@ -259,6 +286,27 @@ export const App: React.FC = () => {
                 : "FULLSCREEN"}
             </button>
           </div>
+
+          {/* Right: Master Volume & Status */}
+          {/* <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-1.5">
+              <span className="text-zinc-400 text-[10px] font-bold">
+                MASTER:
+              </span>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={masterVolume}
+                onChange={(e) => setMasterVolume(parseFloat(e.target.value))}
+                className="w-[70px] accent-blue-600 cursor-pointer"
+              />
+              <span className="text-[11px] text-blue-300 min-w-[30px] font-mono">
+                {Math.round(masterVolume * 100)}%
+              </span>
+            </div>
+          </div> */}
         </div>
       </section>
 
@@ -286,7 +334,7 @@ export const App: React.FC = () => {
           <div className="h-9 bg-zinc-900/90 border-b border-zinc-800 px-3.5 flex justify-between items-center shrink-0">
             <div className="flex items-center gap-2">
               <span className="font-bold text-[13px] text-zinc-100 tracking-wide">
-                tractDAW.
+                tractor.
               </span>
             </div>
 
@@ -324,8 +372,8 @@ export const App: React.FC = () => {
         {/* Top Header */}
         <header className="flex justify-between items-center border-b border-zinc-800 pb-2.5">
           <div>
-            <h1 className="m-0 text-[17px] tracking-wider flex items-center gap-2 font-bold">
-              tractDAW.
+            <h1 className="m-0 text-[24px] tracking-wider flex items-center gap-2 font-bold">
+              tractor
             </h1>
             <div className="text-[11px] text-zinc-500 mt-0.5">
               custom Web DAW.
