@@ -134,8 +134,8 @@ export const App: React.FC = () => {
   // DAW Main Content JSX
   const dawContent = (
     <div className="flex flex-col gap-3 w-full box-border">
-      {/* Transport Bar & View Switcher */}
-      <section className=" border-zinc-800 p-2.5 sm:px-3.5 flex flex-col gap-2.5">
+      {/* Transport Bar */}
+      <section className=" border-zinc-800 text-[13px] p-2.5 sm:px-3.5 flex flex-col gap-2.5">
         {/*Audio Playback & Clock */}
         <div className="flex items-center justify-between flex-wrap gap-2.5">
           {/* Left: Play/Stop & BPM */}
@@ -155,11 +155,11 @@ export const App: React.FC = () => {
             </button>
 
             {/* BPM Stepper & Editable Input */}
-            <div className="flex items-center bg-zinc-950 px-1.5 py-0.5 border border-zinc-700 rounded gap-1">
-              <span className="text-zinc-500 text-[11px] font-bold">BPM:</span>
+            <div className="flex items-center bg-zinc-950 px-1.5 py-0.5 rounded gap-1">
+              <span className="text-zinc-500 font-bold">BPM:</span>
               <button
                 onClick={() => setBpm(bpm - 5)}
-                className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded px-1.5 py-0.5 text-[11px] font-bold cursor-pointer transition-colors"
+                className=" hover:bg-zinc-700 text-zinc-200 px-1.5 py-0.5 text-[11px] font-bold cursor-pointer transition-colors"
                 title="Decrease BPM by 5"
               >
                 -
@@ -183,7 +183,7 @@ export const App: React.FC = () => {
                       setIsEditingBpm(false);
                     }
                   }}
-                  className="w-11 h-[22px] text-center text-[13px] font-bold font-mono text-amber-300 bg-zinc-900 border border-blue-500 rounded outline-none px-0.5"
+                  className="w-11 h-[22px] text-center font-bold font-mono text-white bg-zinc-900 border border-white outline-none px-0.5"
                   title="Type BPM (60-240) and press Enter"
                 />
               ) : (
@@ -193,14 +193,14 @@ export const App: React.FC = () => {
                     setIsEditingBpm(true);
                   }}
                   title="Click to type BPM (60-240)"
-                  className="text-[13px] font-bold min-w-[36px] text-center text-zinc-100 font-mono cursor-pointer rounded px-1 hover:bg-zinc-800 hover:text-amber-300 border border-transparent hover:border-zinc-700 transition-colors select-none"
+                  className="text-[13px] font-bold min-w-[36px] text-center text-zinc-100 font-mono cursor-pointer px-1 hover:bg-zinc-800 hover:text-white  hover:border-zinc-700 transition-colors select-none"
                 >
                   {bpm}
                 </span>
               )}
               <button
                 onClick={() => setBpm(bpm + 5)}
-                className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded px-1.5 py-0.5 text-[10px] font-bold cursor-pointer transition-colors"
+                className=" hover:bg-zinc-700 text-zinc-200 px-1.5 py-0.5 text-[10px] font-bold cursor-pointer transition-colors"
                 title="Increase BPM by 5"
               >
                 +
@@ -229,7 +229,7 @@ export const App: React.FC = () => {
                 <span className="text-zinc-500 text-[11px]">POS:</span>{" "}
                 <span
                   className={`font-bold text-xs ${
-                    isPlaying ? "text-blue-400" : "text-zinc-400"
+                    isPlaying ? "text-white" : "text-zinc-400"
                   }`}
                 >
                   BAR {activeBarIndex >= 0 ? activeBarIndex + 1 : 1} : BEAT{" "}
@@ -241,7 +241,7 @@ export const App: React.FC = () => {
                 STEP:{" "}
                 <span
                   className={`font-bold ${
-                    isPlaying ? "text-emerald-400" : "text-zinc-200"
+                    isPlaying ? "text-white" : "text-zinc-200"
                   }`}
                 >
                   {activeStep >= 0 ? activeStep + 1 : 0}
