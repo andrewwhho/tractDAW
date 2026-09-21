@@ -143,19 +143,19 @@ export const App: React.FC = () => {
             <button
               onClick={togglePlay}
               disabled={!isReady}
-              className={`px-4 py-1.5 rounded text-white font-bold text-xs min-w-[35px] tracking-wide transition-all ${
+              className={`px-1 py-1 text-white font-bold text-xs min-w-[35px] tracking-wide transition-all ${
                 isReady ? "cursor-pointer" : "cursor-not-allowed opacity-50"
               } ${
                 isPlaying
-                  ? "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]"
-                  : "bg-blue-600 hover:bg-blue-500"
+                  ? "bg-zinc-900 hover:bg-zinc-700"
+                  : "hover:bg-zinc-700"
               }`}
             >
               {isPlaying ? "■" : "▶"}
             </button>
 
             {/* BPM Stepper & Editable Input */}
-            <div className="flex items-center bg-zinc-950 px-1.5 py-0.5 rounded gap-1">
+            <div className="flex items-center px-1.5 py-0.5 rounded gap-1">
               <span className="text-zinc-500 font-bold">BPM:</span>
               <button
                 onClick={() => setBpm(bpm - 5)}
